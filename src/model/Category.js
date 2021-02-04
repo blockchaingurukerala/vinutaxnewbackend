@@ -6,11 +6,9 @@ mongoose.connect('mongodb://localhost:27017/taxdb', { useNewUrlParser: true ,use
 
 const Schema = mongoose.Schema;
 var NewUserSchema = new Schema({
-    userFullName : String,
-    userEmailId : String,
-    userPassword:String,
-    incomes:[] 
+    category : String     
 });
-var Userdata = mongoose.model('user', NewUserSchema);                        //UserData is the model and NewBookData is the schema
-module.exports = Userdata;
+var Category = mongoose.model('category', NewUserSchema);                        //UserData is the model and NewBookData is the schema
+module.exports = Category;
+
 
