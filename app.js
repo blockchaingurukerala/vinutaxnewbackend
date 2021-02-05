@@ -1,6 +1,7 @@
 const express=require('express');
 const UserData = require('./src/model/Userdata');
 const Category = require('./src/model/Category');
+const ExpenceCategory = require('./src/model/ExpenceCtegory');
 var app=new express();
 var bodyParser=require('body-parser');
 const cors=require('cors');
@@ -78,6 +79,18 @@ app.post('/checkAvailabilityCategory',function(req,res){
         }
     });    
 });
+app.post('/checkAvailabilityExpenceCategory',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+    var category=req.body.category; 
+    ExpenceCategory.find({category:category}, function (err, docs) {
+        if (docs.length){            
+            res.send({"msg":"Not Available"});
+        }else{
+            res.send({"msg":"Available"});
+        }
+    });    
+});
 app.post('/insertNewCategory',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
@@ -86,6 +99,25 @@ app.post('/insertNewCategory',function(req,res){
         category : req.body.category               
    }       
    var categorynew = new Category(newcategory);
+   categorynew.save(function(err,result){ 
+        if (err){ 
+            console.log(err); 
+            res.send({"msg":"Database Error"});
+        } 
+        else{ 
+            console.log(result) ;
+            res.send({"msg":"Successfully Inserted"});
+        } 
+    }) ;   
+});
+app.post('/insertNewExpenceCategory',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
+    
+    var newcategory = {       
+        category : req.body.category               
+   }       
+   var categorynew = new ExpenceCategory(newcategory);
    categorynew.save(function(err,result){ 
         if (err){ 
             console.log(err); 
@@ -108,7 +140,17 @@ app.get('/getCategories',function(req,res){
         }
     });    
 });
-
+app.get('/getExpenceCategories',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
+    ExpenceCategory.find({}, function (err, docs) {
+        if (docs.length){            
+            res.send(docs);
+        }else{
+            res.send({"msg":"Available"});
+        }
+    });    
+});
 app.post('/updateIncomes',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
@@ -124,7 +166,32 @@ app.post('/updateIncomes',function(req,res){
     });
    
 });
-
+app.post('/updateExpences',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
+     var email=req.body.email;         
+     var expences=req.body.expences;  
+     console.log(expences);  
+    UserData.updateOne({userEmailId:email},{
+        $push: {"expences": {$each: expences}} 
+    },
+    function(err, doc){
+        if (err) {console.log(err);res.send({"msg":"Error in updating"});}
+        else{ res.send({"msg":"Updated"});}
+    });   
+});
+app.post('/getIncomesExpence',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var email=req.body.email;    
+    UserData.find({userEmailId:email}, function (err, docs) {
+        if (docs.length){            
+            res.send(docs);
+        }else{
+            res.send({"msg":"Available"});
+        }
+    });    
+});
 
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
