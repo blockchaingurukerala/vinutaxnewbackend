@@ -2,6 +2,7 @@ const express=require('express');
 const UserData = require('./src/model/Userdata');
 const Category = require('./src/model/Category');
 const ExpenceCategory = require('./src/model/ExpenceCtegory');
+const HmrcUpload=require('./src/model/HmrcUpload');
 var app=new express();
 var bodyParser=require('body-parser');
 const cors=require('cors');
@@ -18,8 +19,7 @@ app.post('/checkAvailability',function(req,res){
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
     var userEmailId=req.body.userEmailId; 
     UserData.find({userEmailId:userEmailId}, function (err, docs) {
-        if (docs.length){
-            
+        if (docs.length){            
             res.send({"msg":"Already Registered"});
         }else{
             res.send({"msg":"Email Available"});
@@ -192,7 +192,41 @@ app.post('/getIncomesExpence',function(req,res){
         }
     });    
 });
-
+app.post('/checkHmrcUploaded',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+    var userEmailId=req.body.userEmailId; 
+    var year=req.body.year;
+    var quarter=req.body.quarter;
+    HmrcUpload.find({userEmailId:userEmailId,year:year,quarter:quarter}, function (err, docs) {
+        if (docs.length){            
+            res.send({"msg":"Already Uploaded"});
+        }else{
+            res.send({"msg":"Not Uploaded"});
+        }
+    });    
+});
+app.post('/hmrcUploaded',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
+    
+    var hmrcuploaded = {       
+        userEmailId : req.body.userEmailId,
+        year : req.body.year,
+        quarter: req.body.quarter        
+   }       
+   var hmrc = new HmrcUpload(hmrcuploaded);
+   hmrc.save(function(err,result){ 
+        if (err){ 
+            console.log(err); 
+            res.send({"msg":"Database Error"});
+        } 
+        else{ 
+            console.log(result) ;
+            res.send({"msg":"Successfully Inserted"});
+        } 
+    }) ;   
+});
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
 });
