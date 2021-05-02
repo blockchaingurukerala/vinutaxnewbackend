@@ -221,8 +221,7 @@ app.post('/hmrcUploaded',function(req,res){
             console.log(err); 
             res.send({"msg":"Database Error"});
         } 
-        else{ 
-            console.log(result) ;
+        else{             
             res.send({"msg":"Successfully Inserted"});
         } 
     }) ;   
