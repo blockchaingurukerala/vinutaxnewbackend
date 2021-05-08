@@ -30,9 +30,9 @@ app.post('/authenticate',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
     var userEmailId=req.body.userEmailId;      
-    console.log(userEmailId)
+   
      UserData.find({userEmailId:userEmailId}).select('userPassword userFullName -_id').then((pwd)=>{
-        console.log(pwd);
+      
         res.send(pwd);
      });
     // UserData.find({userEmailId:userEmailId,userPassword:password}, function (err, docs) {
@@ -60,7 +60,7 @@ app.post('/insert',function(req,res){
             res.send({"msg":"Database Error"});
         } 
         else{ 
-            console.log(result) ;
+           
             res.send({"msg":"Successfully Inserted"});
         } 
     }) ;
@@ -101,11 +101,11 @@ app.post('/insertNewCategory',function(req,res){
    var categorynew = new Category(newcategory);
    categorynew.save(function(err,result){ 
         if (err){ 
-            console.log(err); 
+            
             res.send({"msg":"Database Error"});
         } 
         else{ 
-            console.log(result) ;
+         
             res.send({"msg":"Successfully Inserted"});
         } 
     }) ;   
@@ -124,7 +124,7 @@ app.post('/insertNewExpenceCategory',function(req,res){
             res.send({"msg":"Database Error"});
         } 
         else{ 
-            console.log(result) ;
+           
             res.send({"msg":"Successfully Inserted"});
         } 
     }) ;   
@@ -156,7 +156,7 @@ app.post('/updateIncomes',function(req,res){
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
      var email=req.body.email;         
      var incomes=req.body.incomes;  
-     console.log(incomes);  
+    
     UserData.updateOne({userEmailId:email},{
         $push: {"incomes": {$each: incomes}} 
     },
@@ -171,7 +171,7 @@ app.post('/updateExpences',function(req,res){
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
      var email=req.body.email;         
      var expences=req.body.expences;  
-     console.log(expences);  
+      
     UserData.updateOne({userEmailId:email},{
         $push: {"expences": {$each: expences}} 
     },
@@ -218,13 +218,57 @@ app.post('/hmrcUploaded',function(req,res){
    var hmrc = new HmrcUpload(hmrcuploaded);
    hmrc.save(function(err,result){ 
         if (err){ 
-            console.log(err); 
+           
             res.send({"msg":"Database Error"});
         } 
         else{             
             res.send({"msg":"Successfully Inserted"});
         } 
     }) ;   
+});
+app.post('/getIncomeID',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
+     var email=req.body.email; 
+     UserData.find({userEmailId:email}, function (err, docs) {
+        if(docs[0].incomes){
+          
+            if (docs[0].incomes.length){ 
+                var len= docs[0].incomes.length;          
+                res.send({"len":len});
+            }else{
+                res.send({"len":"0"});
+            }
+        }
+        else{
+            console.log("income id fails")
+            res.send({"len":"0"}); 
+        }
+      
+    }); 
+   
+});
+
+app.post('/getExpenceID',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
+     var email=req.body.email; 
+     UserData.find({userEmailId:email}, function (err, docs) {
+        if(docs[0].expences){           
+            if (docs[0].expences.length){ 
+                var len= docs[0].expences.length;          
+                res.send({"len":len});
+            }else{
+                res.send({"len":"0"});
+            }
+        }
+        else{
+         
+            res.send({"len":"0"}); 
+        }
+      
+    }); 
+   
 });
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
