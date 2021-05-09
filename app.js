@@ -234,14 +234,16 @@ app.post('/getIncomeID',function(req,res){
         if(docs[0].incomes){
           
             if (docs[0].incomes.length){ 
-                var len= docs[0].incomes.length;          
-                res.send({"len":len});
+                var len= docs[0].incomes.length;  
+                var id=  docs[0].incomes[len-1].id  
+                id++;         
+                res.send({"len":id});
             }else{
                 res.send({"len":"0"});
             }
         }
         else{
-            console.log("income id fails")
+           
             res.send({"len":"0"}); 
         }
       
@@ -256,8 +258,10 @@ app.post('/getExpenceID',function(req,res){
      UserData.find({userEmailId:email}, function (err, docs) {
         if(docs[0].expences){           
             if (docs[0].expences.length){ 
-                var len= docs[0].expences.length;          
-                res.send({"len":len});
+                var len= docs[0].expences.length;  
+                var id=  docs[0].expences[len-1].id  
+                id++;    
+                res.send({"len":id});
             }else{
                 res.send({"len":"0"});
             }
@@ -269,6 +273,99 @@ app.post('/getExpenceID',function(req,res){
       
     }); 
    
+});
+
+app.post('/modifyIncomes',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
+     var email=req.body.email;         
+     var originalincomes=req.body.originalincomes;  
+     var modifiedincomes=req.body.modifiedincomes;  
+     var flag=0;
+     modifiedincomes.forEach(income => {
+        UserData.updateOne({userEmailId:email,'incomes.id': income.id}, {'$set': {
+            'incomes.$.category':income.category ,
+            'incomes.$.description':income.description ,
+            'incomes.$.amount':income.amount ,
+            'incomes.$.date':income.date             
+        }}, function(err, doc){
+            if (err) {
+                flag=1;                
+            }           
+        });
+        //delete the remaining
+        for(var i=0;i<originalincomes.length;i++){
+            if(originalincomes[i].id==income.id){
+                originalincomes.splice(i,1);
+                i--;    
+            }
+        }      
+     });
+     originalincomes.forEach(element => {
+        UserData.updateOne({userEmailId:email,'incomes.id': element.id},{                
+            $pull: { "incomes": {id: element.id } }
+        },
+        function(err, doc){
+            if (err) {flag=2;}
+            else{ }
+        });
+    });
+     if(flag==0){
+        res.send({"msg":"Updated"});
+     }
+     else if(flag==1){
+        res.send({"msg":"Error in updating"});
+     }
+     else{
+        res.send({"msg":"Error in deleting"});
+     }
+});
+
+app.post('/modifyExpences',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
+     var email=req.body.email;         
+     var originalexpences=req.body.originalexpences;  
+     var modifiedexpences=req.body.modifiedexpences;  
+     var flag=0;
+
+     modifiedexpences.forEach(expence => {
+        UserData.updateOne({userEmailId:email,'expences.id': expence.id}, {'$set': {
+            'expences.$.category':expence.category ,
+            'expences.$.description':expence.description ,
+            'expences.$.amount':expence.amount ,
+            'expences.$.date':expence.date             
+        }}, function(err, doc){
+            if (err) {
+                flag=1;                
+            }           
+        });
+         //delete the remaining
+         for(var i=0;i<originalexpences.length;i++){
+            if(originalexpences[i].id==expence.id){
+                originalexpences.splice(i,1);
+                i--;    
+            }
+        } 
+     });
+     originalexpences.forEach(element => {
+        UserData.updateOne({userEmailId:email,'expences.id': element.id},{                
+            $pull: { "expences": {id: element.id } }
+        },
+        function(err, doc){
+            if (err) {flag=2;}
+            else{ }
+        });
+    });
+    if(flag==0){
+        res.send({"msg":"Updated"});
+     }
+     else if(flag==1){
+        res.send({"msg":"Error in updating"});
+     }
+     else{
+        res.send({"msg":"Error in deleting"});
+     }
 });
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
