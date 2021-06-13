@@ -8,6 +8,117 @@ var bodyParser=require('body-parser');
 const cors=require('cors');
 app.use(cors());
 app.use(bodyParser.json());
+
+//For HMRC connection
+const { AuthorizationCode } = require('simple-oauth2');
+const request = require('superagent');
+const dateFormat = require('dateformat');
+const winston = require('winston');
+
+//for HMRC connection
+const clientId = 'hdrHzVkGkTHlhdYIQsVybtb17291';
+const clientSecret = '927726f2-cb72-43a9-af51-dedee01f7331';
+const serverToken = 'SERVER_TOKEN_HERE';
+const apiBaseUrl = 'https://test-api.service.hmrc.gov.uk/';
+const serviceName = 'hello';
+const serviceVersion = '1.0';
+const unRestrictedEndpoint = '/world';
+const appRestrictedEndpoint = '/application';
+const userRestrictedEndpoint = '/user';
+const oauthScope = 'hello';
+
+const log = new (winston.Logger)({
+    transports: [
+      new (winston.transports.Console)({
+        timestamp: () => dateFormat(Date.now(), "isoDateTime"),
+        formatter: (options) => `${options.timestamp()} ${options.level.toUpperCase()} ${options.message ? options.message : ''}
+            ${options.meta && Object.keys(options.meta).length ? JSON.stringify(options.meta) : ''}`
+      })
+    ]
+  });
+const redirectUri = 'http://localhost:8080/oauth20/callback';
+const cookieSession = require('cookie-session');
+app.use(cookieSession({
+    name: 'session',
+    keys: ['oauth2Token', 'caller'],
+    maxAge: 10 * 60 * 60 * 1000 // 10 hours
+  }));
+  const client = new AuthorizationCode({
+    client: {
+      id: clientId,
+      secret: clientSecret,
+    },
+    auth: {
+      tokenHost: apiBaseUrl,
+      tokenPath: '/oauth/token',
+      authorizePath: '/oauth/authorize',
+    },
+  });
+  const authorizationUri = client.authorizeURL({
+    redirect_uri: redirectUri,
+    scope: oauthScope,
+  });
+
+  // Call a user-restricted endpoint
+app.get("/userCall", (req, res) => {
+    
+    if (req.session.oauth2Token) {
+      var accessToken = client.createToken(req.session.oauth2Token);
+  
+      log.info('Using token from session: ', accessToken.token);
+  
+      callApi(userRestrictedEndpoint, res, accessToken.token.access_token);
+    } else {
+      req.session.caller = '/userCall';
+      res.redirect(authorizationUri);
+    }
+  });
+
+  // Callback service parsing the authorization token and asking for the access token
+app.get('/oauth20/callback', async (req, res) => {
+    const { code } = req.query;
+    const options = {
+      code: code,
+      redirect_uri: redirectUri,
+      client_id: clientId,
+      client_secret: clientSecret,
+    };
+  
+    try {
+      const accessToken = await client.getToken(options);
+  
+      req.session.oauth2Token = accessToken;
+  
+      return res.redirect(req.session.caller);
+    } catch(error) {
+      return res.status(500).json('Authentication failed');
+    }
+  });
+
+  // Helper functions
+function callApi(resource, res, bearerToken) {
+    const acceptHeader = `application/vnd.hmrc.${serviceVersion}+json`;
+    const url = apiBaseUrl + serviceName + resource;
+    log.info(`Calling ${url} with Accept: ${acceptHeader}`);
+    const req = request
+      .get(url)
+      .accept(acceptHeader);
+    if(bearerToken) {
+      log.info('Using bearer token:', bearerToken);
+      req.set('Authorization', `Bearer ${bearerToken}`);
+    }
+    req.end((err, apiResponse) => handleResponse(res, err, apiResponse));
+  }
+
+  function handleResponse(res, err, apiResponse) {
+    if (err || !apiResponse.ok) {
+      log.error('Handling error response: ', err);
+      res.send(err);
+    } else {
+      res.send(apiResponse.body);
+    }
+  };
+
 app.get('/testdeploy',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
@@ -221,7 +332,8 @@ app.post('/hmrcUploaded',function(req,res){
            
             res.send({"msg":"Database Error"});
         } 
-        else{             
+        else{ 
+
             res.send({"msg":"Successfully Inserted"});
         } 
     }) ;   
@@ -232,7 +344,6 @@ app.post('/getIncomeID',function(req,res){
      var email=req.body.email; 
      UserData.find({userEmailId:email}, function (err, docs) {
          if(err){
-
          }
         else if(docs[0].incomes){
           
@@ -245,13 +356,10 @@ app.post('/getIncomeID',function(req,res){
                 res.send({"len":"0"});
             }
         }
-        else{
-           
+        else{           
             res.send({"len":"0"}); 
         }
-      
     }); 
-   
 });
 
 app.post('/getExpenceID',function(req,res){

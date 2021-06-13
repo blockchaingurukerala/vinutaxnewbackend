@@ -16,6 +16,12 @@
     "express": "^4.17.1",
     "mongoose": "^5.10.4",
     "nodemon": "^2.0.4",
-    "razorpay": "^2.0.6"
+    "razorpay": "^2.0.6",
+    "cookie-session": "1.4.0",
+    "dateformat": "2.0.0",
+    "debug": "^4.3.1",
+    "simple-oauth2": "4.2.0",
+    "superagent": "6.1.0",
+    "winston": "2.3.1"
   }
 }
