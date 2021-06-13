@@ -231,7 +231,10 @@ app.post('/getIncomeID',function(req,res){
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
      var email=req.body.email; 
      UserData.find({userEmailId:email}, function (err, docs) {
-        if(docs[0].incomes){
+         if(err){
+
+         }
+        else if(docs[0].incomes){
           
             if (docs[0].incomes.length){ 
                 var len= docs[0].incomes.length;  
