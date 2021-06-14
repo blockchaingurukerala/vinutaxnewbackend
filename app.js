@@ -9,6 +9,7 @@ const cors=require('cors');
 app.use(cors());
 app.use(bodyParser.json());
 
+
 //For HMRC connection
 const { AuthorizationCode } = require('simple-oauth2');
 const request = require('superagent');
@@ -61,6 +62,7 @@ app.use(cookieSession({
 
   // Call a user-restricted endpoint
 app.get("/userCall", (req, res) => {
+     
     
     if (req.session.oauth2Token) {
       var accessToken = client.createToken(req.session.oauth2Token);
@@ -481,4 +483,3 @@ app.post('/modifyExpences',function(req,res){
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
 });
-
