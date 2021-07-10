@@ -6,16 +6,29 @@ const HmrcUpload=require('./src/model/HmrcUpload');
 var app=new express();
 var bodyParser=require('body-parser');
 const cors=require('cors');
+app.options('*', cors())
 app.use(cors());
-app.use(bodyParser.json());
+//app.use(bodyParser.json());
+// const path=require('path');
+// app.use(express.static(__dirname+'/dist/tax'));
+app.use(express.urlencoded({
+    extended: true
+  }));
+app.use(express.json());
+// const allowedOrigins = ['localhost:4200'];
 
+// const options = {
+//   origin: allowedOrigins
+// };
+
+// app.use(cors(options));
 
 //For HMRC connection
 const { AuthorizationCode } = require('simple-oauth2');
 const request = require('superagent');
 const dateFormat = require('dateformat');
 const winston = require('winston');
-
+// app.set('view engine', 'ejs');
 //for HMRC connection
 const clientId = 'hdrHzVkGkTHlhdYIQsVybtb17291';
 const clientSecret = '927726f2-cb72-43a9-af51-dedee01f7331';
@@ -26,7 +39,13 @@ const serviceVersion = '1.0';
 const unRestrictedEndpoint = '/world';
 const appRestrictedEndpoint = '/application';
 const userRestrictedEndpoint = '/user';
-const oauthScope = 'hello';
+//const oauthScope = 'hello';
+const oauthScope = 'read:self-assessment';
+
+
+// app.get('/',function(req,res){
+//     res.sendFile(path.join(__dirname+'/dist/tax/index.html'))
+// });
 
 const log = new (winston.Logger)({
     transports: [
@@ -37,7 +56,9 @@ const log = new (winston.Logger)({
       })
     ]
   });
-const redirectUri = 'http://localhost:8080/oauth20/callback';
+
+const redirectUri = 'http://localhost:3000/oauth20/callback';                 
+//const redirectUri = 'http://localhost:4200/report';   
 const cookieSession = require('cookie-session');
 app.use(cookieSession({
     name: 'session',
@@ -61,22 +82,24 @@ app.use(cookieSession({
   });
 
   // Call a user-restricted endpoint
-app.get("/userCall", (req, res) => {
-     
-    
+app.get("/userCall", (req, res) => {    
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
     if (req.session.oauth2Token) {
-      var accessToken = client.createToken(req.session.oauth2Token);
-  
-      log.info('Using token from session: ', accessToken.token);
-  
+      var accessToken = client.createToken(req.session.oauth2Token);  
+      //log.info('Using token from session: ', accessToken.token);
+        //console.log('Using token from session: ', accessToken.token);
       callApi(userRestrictedEndpoint, res, accessToken.token.access_token);
     } else {
+      console.log('Redirect to HMRC page: ',req.session.oauth2Token)
       req.session.caller = '/userCall';
+      //console.log(authorizationUri)
       res.redirect(authorizationUri);
     }
   });
 
   // Callback service parsing the authorization token and asking for the access token
+
 app.get('/oauth20/callback', async (req, res) => {
     const { code } = req.query;
     const options = {
@@ -88,9 +111,9 @@ app.get('/oauth20/callback', async (req, res) => {
   
     try {
       const accessToken = await client.getToken(options);
-  
-      req.session.oauth2Token = accessToken;
-  
+        console.log("response back to client......");
+      req.session.oauth2Token = accessToken;  
+      //console.log(req.session.caller)
       return res.redirect(req.session.caller);
     } catch(error) {
       return res.status(500).json('Authentication failed');
@@ -99,9 +122,11 @@ app.get('/oauth20/callback', async (req, res) => {
 
   // Helper functions
 function callApi(resource, res, bearerToken) {
+    
     const acceptHeader = `application/vnd.hmrc.${serviceVersion}+json`;
-    const url = apiBaseUrl + serviceName + resource;
-    log.info(`Calling ${url} with Accept: ${acceptHeader}`);
+    //const url = apiBaseUrl + serviceName + resource;
+    const url = apiBaseUrl +"/individuals/calculations/CL670073B/self-assessment";
+    //log.info(`Calling ${url} with Accept: ${acceptHeader}`);
     const req = request
       .get(url)
       .accept(acceptHeader);
@@ -117,7 +142,9 @@ function callApi(resource, res, bearerToken) {
       log.error('Handling error response: ', err);
       res.send(err);
     } else {
-      res.send(apiResponse.body);
+        //console.log(apiResponse.body)
+        //res.send(apiResponse.body);
+        res.redirect("http://localhost:4200/displayfromhmrc"+"/?str="+JSON.stringify(apiResponse.body));
     }
   };
 
@@ -125,8 +152,9 @@ app.get('/testdeploy',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
     console.log("Test deploy.....");    
-    res.send("Successfully BackEnd Deployed");
+    res.send({"msg":"Successfully deployed"});
 });
+
 app.post('/checkAvailability',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
@@ -142,25 +170,14 @@ app.post('/checkAvailability',function(req,res){
 app.post('/authenticate',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
-    var userEmailId=req.body.userEmailId;      
-   
+    var userEmailId=req.body.userEmailId;   
      UserData.find({userEmailId:userEmailId}).select('userPassword userFullName -_id').then((pwd)=>{
-      
         res.send(pwd);
-     });
-    // UserData.find({userEmailId:userEmailId,userPassword:password}, function (err, docs) {
-    //     if (docs.length){  
-    //         //console.log(docs) ;         
-    //         res.send({"msg":"success"},{"userFullName":docs.userFullName});
-    //     }else{
-    //         res.send({"msg":"failed"});  
-    //     }
-    // });
+     });   
 });
 app.post('/insert',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
-    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
-    
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
     var user = {       
         userFullName : req.body.userFullName,
         userEmailId : req.body.userEmailId,
@@ -172,8 +189,7 @@ app.post('/insert',function(req,res){
             console.log(err); 
             res.send({"msg":"Database Error"});
         } 
-        else{ 
-           
+        else{            
             res.send({"msg":"Successfully Inserted"});
         } 
     }) ;
@@ -213,12 +229,10 @@ app.post('/insertNewCategory',function(req,res){
    }       
    var categorynew = new Category(newcategory);
    categorynew.save(function(err,result){ 
-        if (err){ 
-            
+        if (err){             
             res.send({"msg":"Database Error"});
         } 
-        else{ 
-         
+        else{          
             res.send({"msg":"Successfully Inserted"});
         } 
     }) ;   
@@ -236,8 +250,7 @@ app.post('/insertNewExpenceCategory',function(req,res){
             console.log(err); 
             res.send({"msg":"Database Error"});
         } 
-        else{ 
-           
+        else{            
             res.send({"msg":"Successfully Inserted"});
         } 
     }) ;   
@@ -268,8 +281,7 @@ app.post('/updateIncomes',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
      var email=req.body.email;         
-     var incomes=req.body.incomes;  
-    
+     var incomes=req.body.incomes;     
     UserData.updateOne({userEmailId:email},{
         $push: {"incomes": {$each: incomes}} 
     },
