@@ -3,6 +3,9 @@ const UserData = require('./src/model/Userdata');
 const Category = require('./src/model/Category');
 const ExpenceCategory = require('./src/model/ExpenceCtegory');
 const HmrcUpload=require('./src/model/HmrcUpload');
+const CustomerDetails=require('./src/model/CustomerDetails');
+const CustomerInvoice=require('./src/model/CustomerInvoice');
+
 var app=new express();
 var bodyParser=require('body-parser');
 const cors=require('cors');
@@ -142,7 +145,7 @@ function callApi(resource, res, bearerToken) {
       log.error('Handling error response: ', err);
       res.send(err);
     } else {
-        //console.log(apiResponse.body)
+        console.log(apiResponse.body)
         //res.send(apiResponse.body);
         res.redirect("http://localhost:4200/displayfromhmrc"+"/?str="+JSON.stringify(apiResponse.body));
     }
@@ -491,6 +494,110 @@ app.post('/modifyExpences',function(req,res){
      else{
         res.send({"msg":"Error in deleting"});
      }
+});
+app.post('/addCustomerDetils',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
+    var user = {       
+        userFullName : req.body.name,
+        userEmailId : req.body.email,
+        userContactNo: req.body.contactno ,
+        userAddress: req.body.address  ,
+        userWhose: req.body.whose        
+   }       
+   var user = new CustomerDetails(user);
+   CustomerDetails.find({userEmailId:req.body.email,userWhose:req.body.whose}, function (err, docs) {
+        if (docs.length){            
+            res.send({"msg":"Already Registered"});
+        }else{
+            user.save(function(err,result){ 
+                if (err){ 
+                    console.log(err); 
+                    res.send({"msg":"Database Error"});
+                } 
+                else{            
+                    res.send({"msg":"Successfully Inserted"});
+                } 
+            }) ;
+        }
+    }); 
+});
+
+app.post('/addCustomerInvoice',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
+    var invoice = {       
+        date : req.body.date,
+        duedate : req.body.duedate,
+        invoiceid: req.body.invoiceid ,
+        reference: req.body.reference  ,
+        products: req.body.products ,
+        totalamount: req.body.totalamount  ,       
+        additionaldetails: req.body.additionaldetails  ,
+        whose: req.body.whose  ,
+        count:0        
+   }       
+    var invoice = new CustomerInvoice(invoice);
+    invoice.save(function(err,result){ 
+        if (err){ 
+            console.log(err); 
+            res.send({"msg":"Database Error"});
+        } 
+        else{            
+            var findQuery = CustomerInvoice.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+            findQuery.exec(function(err, maxResult){
+                if (err) { res.send({"msg":"Error in Creating Invoice Number"});}
+                else { 
+                    if(maxResult.length>0) {
+                        CustomerInvoice.updateOne({whose:req.body.whose}, 
+                            {count:maxResult[0].count+1}, function (err, docs) {
+                            if (err){
+                                res.send({"msg":"Error in Creating Invoice Number"});
+                            }
+                            else{
+                                res.send({"msg":"Successfully Inserted"});
+                            }
+                        });
+                    }
+                    else{
+
+                        CustomerInvoice.updateOne({whose:req.body.whose}, 
+                            {count:1}, function (err, docs) {
+                            if (err){
+                                res.send({"msg":"Error in Creating Invoice Number"});
+                            }
+                            else{
+                                res.send({"msg":"Successfully Inserted"});
+                            }
+                        });
+                    }
+                }
+            });
+               
+        } 
+    }) ;
+});
+app.post('/createNextCustomerInvoiceNumber',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    var findQuery = CustomerInvoice.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+    findQuery.exec(function(err, maxResult){
+        if (err) { res.send({"msg":"Error in Creating Invoice Number"});}
+        else { 
+            if(maxResult.length>0) {
+                if( maxResult[0].count){
+                    res.send({"msg":"INV-0"+(maxResult[0].count+1)});               
+                }
+                else{
+                    res.send({"msg":"INV-01"});                           
+                } 
+            }  
+            else{
+                res.send({"msg":"INV-01"});   
+            }        
+                             
+        }
+    });
 });
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
