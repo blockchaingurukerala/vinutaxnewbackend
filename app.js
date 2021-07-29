@@ -5,6 +5,8 @@ const ExpenceCategory = require('./src/model/ExpenceCtegory');
 const HmrcUpload=require('./src/model/HmrcUpload');
 const CustomerDetails=require('./src/model/CustomerDetails');
 const CustomerInvoice=require('./src/model/CustomerInvoice');
+const CustomerInvoiceDraft=require('./src/model/CustomerInvoiceDraft');
+
 
 var app=new express();
 var bodyParser=require('body-parser');
@@ -508,15 +510,17 @@ app.post('/addCustomerDetils',function(req,res){
    var user = new CustomerDetails(user);
    CustomerDetails.find({userEmailId:req.body.email,userWhose:req.body.whose}, function (err, docs) {
         if (docs.length){            
-            res.send({"msg":"Already Registered"});
+            res.send({"msg":docs[0]._id});            
+
         }else{
             user.save(function(err,result){ 
                 if (err){ 
-                    console.log(err); 
+                   // console.log(err); 
                     res.send({"msg":"Database Error"});
                 } 
-                else{            
-                    res.send({"msg":"Successfully Inserted"});
+                else{    
+                    //console.log()
+                   res.send({"msg":result._id});
                 } 
             }) ;
         }
@@ -535,6 +539,7 @@ app.post('/addCustomerInvoice',function(req,res){
         totalamount: req.body.totalamount  ,       
         additionaldetails: req.body.additionaldetails  ,
         whose: req.body.whose  ,
+        customerid: req.body.customerid  ,
         count:0        
    }       
     var invoice = new CustomerInvoice(invoice);
@@ -577,6 +582,62 @@ app.post('/addCustomerInvoice',function(req,res){
         } 
     }) ;
 });
+
+app.post('/addCustomerInvoiceDraft',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
+    var invoice = {       
+        date : req.body.date,
+        duedate : req.body.duedate,
+        invoiceid: req.body.invoiceid ,
+        reference: req.body.reference  ,
+        products: req.body.products ,
+        totalamount: req.body.totalamount  ,       
+        additionaldetails: req.body.additionaldetails  ,
+        whose: req.body.whose  ,
+        customerid: req.body.customerid  ,
+        count:0        
+   }       
+    var invoice = new CustomerInvoiceDraft(invoice);
+    invoice.save(function(err,result){ 
+        if (err){ 
+            console.log(err); 
+            res.send({"msg":"Database Error"});
+        } 
+        else{            
+            var findQuery = CustomerInvoice.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+            findQuery.exec(function(err, maxResult){
+                if (err) { res.send({"msg":"Error in Creating Invoice Number"});}
+                else { 
+                    if(maxResult.length>0) {
+                        CustomerInvoice.updateOne({whose:req.body.whose}, 
+                            {count:maxResult[0].count+1}, function (err, docs) {
+                            if (err){
+                                res.send({"msg":"Error in Creating Invoice Number"});
+                            }
+                            else{
+                                res.send({"msg":"Successfully Saved"});
+                            }
+                        });
+                    }
+                    else{
+
+                        CustomerInvoice.updateOne({whose:req.body.whose}, 
+                            {count:1}, function (err, docs) {
+                            if (err){
+                                res.send({"msg":"Error in Creating Invoice Number"});
+                            }
+                            else{
+                                res.send({"msg":"Successfully Saved"});
+                            }
+                        });
+                    }
+                }
+            });
+               
+        } 
+    }) ;
+});
 app.post('/createNextCustomerInvoiceNumber',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
@@ -598,6 +659,13 @@ app.post('/createNextCustomerInvoiceNumber',function(req,res){
                              
         }
     });
+});
+app.post('/getAllCustomers',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    CustomerDetails.find({userWhose:req.body.whose}, function (err, docs) {
+       res.send(docs);
+    });  
 });
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
