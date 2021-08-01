@@ -667,6 +667,29 @@ app.post('/getAllCustomers',function(req,res){
        res.send(docs);
     });  
 });
+
+app.post('/getAllCustomerInvoioce',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    CustomerInvoice.find({whose:req.body.whose}, function (err, docs) {
+       res.send(docs);
+    });  
+});
+app.post('/getAllCustomerDraftInvoioce',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    CustomerInvoiceDraft.find({whose:req.body.whose}, function (err, docs) {
+       res.send(docs);
+    });  
+});
+app.post('/getCustomerNameFromId',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    CustomerDetails.find({_id:req.body.id}, function (err, docs) {
+        console.log(docs[0].userFullName);
+        res.send({"name":docs[0].userFullName});
+    });  
+});
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
 });
