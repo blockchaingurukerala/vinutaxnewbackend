@@ -550,11 +550,12 @@ app.post('/addCustomerInvoice',function(req,res){
         } 
         else{            
             var findQuery = CustomerInvoice.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+            
             findQuery.exec(function(err, maxResult){
                 if (err) { res.send({"msg":"Error in Creating Invoice Number"});}
                 else { 
                     if(maxResult.length>0) {
-                        CustomerInvoice.updateOne({whose:req.body.whose}, 
+                        CustomerInvoice.updateOne({_id:result._id}, 
                             {count:maxResult[0].count+1}, function (err, docs) {
                             if (err){
                                 res.send({"msg":"Error in Creating Invoice Number"});
@@ -703,6 +704,41 @@ app.post('/getDraftCustomerInvoioceFromId',function(req,res){
     CustomerInvoiceDraft.find({_id:req.body.id}, function (err, docs) {
        res.send(docs);
     });  
+});
+
+app.post('/updteCustomerInvoice',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;
+    var date = req.body.date;
+    var duedate = req.body.duedate;
+    var invoiceid= req.body.invoiceid;
+    var reference= req.body.reference;
+    var products=req.body.products;
+    var totalamount= req.body.totalamount;       
+    var additionaldetails=req.body.additionaldetails;
+    CustomerInvoice.updateOne({_id :id}, 
+        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,additionaldetails:additionaldetails}, function (err, docs) {
+        if (err){
+            res.send({"msg":"Database Error"});
+        }
+        else{
+            res.send({"msg":"successfully Updated"});
+        }
+    });
+});
+app.post('/deleteCustomerInvoice',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;    
+    CustomerInvoice.deleteMany({_id :id}, function (err, _) {
+        if (err) {
+            res.send({"msg":"Error while Deleting...Pls Try after some time"});
+        }
+        else{
+            res.send({"msg":"Deleted Successfully"});
+        }
+    });
 });
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
