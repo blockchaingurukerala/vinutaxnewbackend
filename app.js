@@ -555,25 +555,41 @@ app.post('/addCustomerInvoice',function(req,res){
                 if (err) { res.send({"msg":"Error in Creating Invoice Number"});}
                 else { 
                     if(maxResult.length>0) {
-                        CustomerInvoice.updateOne({_id:result._id}, 
+                        CustomerInvoice.updateMany({whose:req.body.whose}, 
                             {count:maxResult[0].count+1}, function (err, docs) {
                             if (err){
                                 res.send({"msg":"Error in Creating Invoice Number"});
                             }
                             else{
-                                res.send({"msg":"Successfully Inserted"});
+                                CustomerInvoiceDraft.updateMany({whose:req.body.whose}, 
+                                    {count:maxResult[0].count+1}, function (err, docs) {
+                                    if (err){
+                                        res.send({"msg":"Error in Creating Invoice Number"});
+                                    }
+                                    else{                                        
+                                        res.send({"msg":"Successfully Saved"});
+                                    }
+                                });   
                             }
                         });
                     }
                     else{
 
-                        CustomerInvoice.updateOne({whose:req.body.whose}, 
+                        CustomerInvoice.updateMany({whose:req.body.whose}, 
                             {count:1}, function (err, docs) {
                             if (err){
                                 res.send({"msg":"Error in Creating Invoice Number"});
                             }
                             else{
-                                res.send({"msg":"Successfully Inserted"});
+                                CustomerInvoiceDraft.updateMany({whose:req.body.whose}, 
+                                    {count:1}, function (err, docs) {
+                                    if (err){
+                                        res.send({"msg":"Error in Creating Invoice Number"});
+                                    }
+                                    else{                                        
+                                        res.send({"msg":"Successfully Saved"});
+                                    }
+                                });   
                             }
                         });
                     }
@@ -611,25 +627,42 @@ app.post('/addCustomerInvoiceDraft',function(req,res){
                 if (err) { res.send({"msg":"Error in Creating Invoice Number"});}
                 else { 
                     if(maxResult.length>0) {
-                        CustomerInvoice.updateOne({whose:req.body.whose}, 
+                        CustomerInvoice.updateMany({whose:req.body.whose}, 
                             {count:maxResult[0].count+1}, function (err, docs) {
                             if (err){
                                 res.send({"msg":"Error in Creating Invoice Number"});
                             }
                             else{
-                                res.send({"msg":"Successfully Saved"});
+                                CustomerInvoiceDraft.updateMany({whose:req.body.whose}, 
+                                    {count:maxResult[0].count+1}, function (err, docs) {
+                                    if (err){
+                                        res.send({"msg":"Error in Creating Invoice Number"});
+                                    }
+                                    else{                                        
+                                        res.send({"msg":"Successfully Saved"});
+                                    }
+                                });                               
                             }
                         });
+
                     }
                     else{
 
-                        CustomerInvoice.updateOne({whose:req.body.whose}, 
+                        CustomerInvoice.updateMany({whose:req.body.whose}, 
                             {count:1}, function (err, docs) {
                             if (err){
                                 res.send({"msg":"Error in Creating Invoice Number"});
                             }
                             else{
-                                res.send({"msg":"Successfully Saved"});
+                                CustomerInvoiceDraft.updateMany({whose:req.body.whose}, 
+                                    {count:1}, function (err, docs) {
+                                    if (err){
+                                        res.send({"msg":"Error in Creating Invoice Number"});
+                                    }
+                                    else{                                        
+                                        res.send({"msg":"Successfully Saved"});
+                                    }
+                                });   
                             }
                         });
                     }
