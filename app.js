@@ -760,11 +760,45 @@ app.post('/updteCustomerInvoice',function(req,res){
         }
     });
 });
+app.post('/updteCustomerInvoiceDraft',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;
+    var date = req.body.date;
+    var duedate = req.body.duedate;
+    var invoiceid= req.body.invoiceid;
+    var reference= req.body.reference;
+    var products=req.body.products;
+    var totalamount= req.body.totalamount;       
+    var additionaldetails=req.body.additionaldetails;
+    CustomerInvoiceDraft.updateOne({_id :id}, 
+        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,additionaldetails:additionaldetails}, function (err, docs) {
+        if (err){
+            res.send({"msg":"Database Error"});
+        }
+        else{
+            res.send({"msg":"successfully Updated"});
+        }
+    });
+});
 app.post('/deleteCustomerInvoice',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
     var id=req.body.id;    
     CustomerInvoice.deleteMany({_id :id}, function (err, _) {
+        if (err) {
+            res.send({"msg":"Error while Deleting...Pls Try after some time"});
+        }
+        else{
+            res.send({"msg":"Deleted Successfully"});
+        }
+    });
+});
+app.post('/deleteCustomerInvoiceFromDraft',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;    
+    CustomerInvoiceDraft.deleteMany({_id :id}, function (err, _) {
         if (err) {
             res.send({"msg":"Error while Deleting...Pls Try after some time"});
         }
