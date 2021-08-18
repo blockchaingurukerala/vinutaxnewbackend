@@ -807,6 +807,63 @@ app.post('/deleteCustomerInvoiceFromDraft',function(req,res){
         }
     });
 });
+app.post('/aprovedraftinvoice',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;    
+    CustomerInvoiceDraft.find({_id:id},function(err,data){    
+        var invoice = {       
+            date : data[0].date,
+            duedate : data[0].duedate,
+            invoiceid: data[0].invoiceid ,
+            reference: data[0].reference  ,
+            products: data[0].products ,
+            totalamount: data[0].totalamount  ,       
+            additionaldetails: data[0].additionaldetails  ,
+            whose: data[0].whose  ,
+            customerid: data[0].customerid  ,
+            count:data[0].count      
+       }    
+        var invoice = new CustomerInvoice(invoice);
+        invoice.save(function(err,result){ 
+            if(err){
+                res.send({"msg":"Error while Deleting...Pls Try after some time"});
+            }
+            else{
+                    CustomerInvoiceDraft.deleteMany({_id :id}, function (err, _) {
+                        if (err) {
+                            res.send({"msg":"Error while Deleting...Pls Try after some time"});
+                        }
+                        else{
+                            res.send({"msg":"Aproved Successfully"});
+                        }
+                    });
+            }
+        });
+    });
+  
+});
+app.post('/getCustomerDetails',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    CustomerDetails.find({_id:req.body.id}, function (err, docs) {
+       res.send(docs);
+    });  
+});
+app.post('/getAllInvoioceOfACustomer',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    CustomerInvoice.find({whose:req.body.whose,customerid:req.body.customerid}, function (err, docs) {
+       res.send(docs);
+    });  
+});
+app.post('/getAllInvoioceOfACustomerDraft',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    CustomerInvoiceDraft.find({whose:req.body.whose,customerid:req.body.customerid}, function (err, docs) {
+       res.send(docs);
+    });  
+});
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
 });
