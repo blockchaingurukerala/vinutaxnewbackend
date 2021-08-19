@@ -864,6 +864,25 @@ app.post('/getAllInvoioceOfACustomerDraft',function(req,res){
        res.send(docs);
     });  
 });
+app.post('/updateCustomer',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;
+    var userFullName = req.body.userFullName;
+    var userEmailId = req.body.userEmailId;
+    var userContactNo= req.body.userContactNo;
+    var userAddress= req.body.userAddress;
+   
+    CustomerDetails.updateOne({_id :id}, 
+        {userFullName:userFullName,userEmailId:userEmailId,userContactNo:userContactNo,userAddress:userAddress}, function (err, docs) {
+        if (err){
+            res.send({"msg":"Database Error"});
+        }
+        else{
+            res.send({"msg":"successfully Updated"});
+        }
+    });
+});
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
 });
