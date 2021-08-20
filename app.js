@@ -719,8 +719,7 @@ app.post('/getAllCustomerDraftInvoioce',function(req,res){
 app.post('/getCustomerNameFromId',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
-    CustomerDetails.find({_id:req.body.id}, function (err, docs) {
-        
+    CustomerDetails.find({_id:req.body.id}, function (err, docs) {        
         res.send({"name":docs[0].userFullName});
     });  
 });
@@ -883,6 +882,7 @@ app.post('/updateCustomer',function(req,res){
         }
     });
 });
+
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
 });
