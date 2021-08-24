@@ -3,9 +3,15 @@ const UserData = require('./src/model/Userdata');
 const Category = require('./src/model/Category');
 const ExpenceCategory = require('./src/model/ExpenceCtegory');
 const HmrcUpload=require('./src/model/HmrcUpload');
+
 const CustomerDetails=require('./src/model/CustomerDetails');
+const SupplierDetails=require('./src/model/SupplierDetails');
+
 const CustomerInvoice=require('./src/model/CustomerInvoice');
+const SupplierInvoice=require('./src/model/SupplierInvoice');
+
 const CustomerInvoiceDraft=require('./src/model/CustomerInvoiceDraft');
+const SupplierInvoiceDraft=require('./src/model/SupplierInvoiceDraft');
 
 
 var app=new express();
@@ -701,11 +707,25 @@ app.post('/getAllCustomers',function(req,res){
        res.send(docs);
     });  
 });
-
+app.post('/getAllSuppliers',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    SupplierDetails.find({userWhose:req.body.whose}, function (err, docs) {
+       res.send(docs);
+    });  
+});
 app.post('/getAllCustomerInvoioce',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
     CustomerInvoice.find({whose:req.body.whose}, function (err, docs) {
+       res.send(docs);
+    });  
+});
+
+app.post('/getAllSupplierInvoioce',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    SupplierInvoice.find({whose:req.body.whose}, function (err, docs) {
        res.send(docs);
     });  
 });
@@ -716,10 +736,24 @@ app.post('/getAllCustomerDraftInvoioce',function(req,res){
        res.send(docs);
     });  
 });
+app.post('/getAllSupplierDraftInvoioce',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    SupplierInvoiceDraft.find({whose:req.body.whose}, function (err, docs) {
+       res.send(docs);
+    });  
+});
 app.post('/getCustomerNameFromId',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
     CustomerDetails.find({_id:req.body.id}, function (err, docs) {        
+        res.send({"name":docs[0].userFullName});
+    });  
+});
+app.post('/getSupplierNameFromId',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    SupplierDetails.find({_id:req.body.id}, function (err, docs) {        
         res.send({"name":docs[0].userFullName});
     });  
 });
