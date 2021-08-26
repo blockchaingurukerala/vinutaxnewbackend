@@ -532,7 +532,35 @@ app.post('/addCustomerDetils',function(req,res){
         }
     }); 
 });
+app.post('/addSupplierDetils',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
+    var user = {       
+        userFullName : req.body.name,
+        userEmailId : req.body.email,
+        userContactNo: req.body.contactno ,
+        userAddress: req.body.address  ,
+        userWhose: req.body.whose        
+   }       
+   var user = new SupplierDetails(user);
+   SupplierDetails.find({userEmailId:req.body.email,userWhose:req.body.whose}, function (err, docs) {
+        if (docs.length){            
+            res.send({"msg":docs[0]._id});            
 
+        }else{
+            user.save(function(err,result){ 
+                if (err){ 
+                   // console.log(err); 
+                    res.send({"msg":"Database Error"});
+                } 
+                else{    
+                    //console.log()
+                   res.send({"msg":result._id});
+                } 
+            }) ;
+        }
+    }); 
+});
 app.post('/addCustomerInvoice',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
@@ -605,7 +633,32 @@ app.post('/addCustomerInvoice',function(req,res){
         } 
     }) ;
 });
-
+app.post('/addSupplierInvoice',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
+    var invoice = {       
+        date : req.body.date,
+        duedate : req.body.duedate,
+        invoiceid: req.body.invoiceid ,
+        reference: req.body.reference  ,
+        products: req.body.products ,
+        totalamount: req.body.totalamount  ,       
+        additionaldetails: req.body.additionaldetails  ,
+        whose: req.body.whose  ,
+        customerid: req.body.customerid  ,
+        count:0        
+   }       
+    var invoice = new SupplierInvoice(invoice);
+    invoice.save(function(err,result){ 
+        if (err){ 
+            console.log(err); 
+            res.send({"msg":"Database Error"});
+        } 
+        else{            
+            res.send({"msg":"Successfully Saved"});               
+        } 
+    }) ;
+});
 app.post('/addCustomerInvoiceDraft',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
@@ -675,6 +728,32 @@ app.post('/addCustomerInvoiceDraft',function(req,res){
                 }
             });
                
+        } 
+    }) ;
+});
+app.post('/addSupplierInvoiceDraft',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
+    var invoice = {       
+        date : req.body.date,
+        duedate : req.body.duedate,
+        invoiceid: req.body.invoiceid ,
+        reference: req.body.reference  ,
+        products: req.body.products ,
+        totalamount: req.body.totalamount  ,       
+        additionaldetails: req.body.additionaldetails  ,
+        whose: req.body.whose  ,
+        customerid: req.body.customerid  ,
+        count:0        
+   }       
+    var invoice = new SupplierInvoiceDraft(invoice);
+    invoice.save(function(err,result){ 
+        if (err){ 
+            console.log(err); 
+            res.send({"msg":"Database Error"});
+        } 
+        else{            
+            res.send({"msg":"Successfully Saved"});               
         } 
     }) ;
 });
