@@ -843,10 +843,24 @@ app.post('/getCustomerInvoioceFromId',function(req,res){
        res.send(docs);
     });  
 });
+app.post('/getSupplierInvoioceFromId',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    SupplierInvoice.find({_id:req.body.id}, function (err, docs) {
+       res.send(docs);
+    });  
+});
 app.post('/getDraftCustomerInvoioceFromId',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
     CustomerInvoiceDraft.find({_id:req.body.id}, function (err, docs) {
+       res.send(docs);
+    });  
+});
+app.post('/getDraftSupplierInvoioceFromId',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    SupplierInvoiceDraft.find({_id:req.body.id}, function (err, docs) {
        res.send(docs);
     });  
 });
@@ -863,6 +877,27 @@ app.post('/updteCustomerInvoice',function(req,res){
     var totalamount= req.body.totalamount;       
     var additionaldetails=req.body.additionaldetails;
     CustomerInvoice.updateOne({_id :id}, 
+        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,additionaldetails:additionaldetails}, function (err, docs) {
+        if (err){
+            res.send({"msg":"Database Error"});
+        }
+        else{
+            res.send({"msg":"successfully Updated"});
+        }
+    });
+});
+app.post('/updteSupplierInvoice',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;
+    var date = req.body.date;
+    var duedate = req.body.duedate;
+    var invoiceid= req.body.invoiceid;
+    var reference= req.body.reference;
+    var products=req.body.products;
+    var totalamount= req.body.totalamount;       
+    var additionaldetails=req.body.additionaldetails;
+    SupplierInvoice.updateOne({_id :id}, 
         {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,additionaldetails:additionaldetails}, function (err, docs) {
         if (err){
             res.send({"msg":"Database Error"});
@@ -893,6 +928,27 @@ app.post('/updteCustomerInvoiceDraft',function(req,res){
         }
     });
 });
+app.post('/updteSupplierInvoiceDraft',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;
+    var date = req.body.date;
+    var duedate = req.body.duedate;
+    var invoiceid= req.body.invoiceid;
+    var reference= req.body.reference;
+    var products=req.body.products;
+    var totalamount= req.body.totalamount;       
+    var additionaldetails=req.body.additionaldetails;
+    SupplierInvoiceDraft.updateOne({_id :id}, 
+        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,additionaldetails:additionaldetails}, function (err, docs) {
+        if (err){
+            res.send({"msg":"Database Error"});
+        }
+        else{
+            res.send({"msg":"successfully Updated"});
+        }
+    });
+});
 app.post('/deleteCustomerInvoice',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
@@ -906,11 +962,37 @@ app.post('/deleteCustomerInvoice',function(req,res){
         }
     });
 });
+app.post('/deleteSupplierInvoice',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;    
+    SupplierInvoice.deleteMany({_id :id}, function (err, _) {
+        if (err) {
+            res.send({"msg":"Error while Deleting...Pls Try after some time"});
+        }
+        else{
+            res.send({"msg":"Deleted Successfully"});
+        }
+    });
+});
 app.post('/deleteCustomerInvoiceFromDraft',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
     var id=req.body.id;    
     CustomerInvoiceDraft.deleteMany({_id :id}, function (err, _) {
+        if (err) {
+            res.send({"msg":"Error while Deleting...Pls Try after some time"});
+        }
+        else{
+            res.send({"msg":"Deleted Successfully"});
+        }
+    });
+});
+app.post('/deleteSupplierInvoiceFromDraft',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;    
+    SupplierInvoiceDraft.deleteMany({_id :id}, function (err, _) {
         if (err) {
             res.send({"msg":"Error while Deleting...Pls Try after some time"});
         }
@@ -952,13 +1034,53 @@ app.post('/aprovedraftinvoice',function(req,res){
                     });
             }
         });
-    });
-  
+    });  
+});
+app.post('/aprovedraftinvoiceSupplier',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;    
+    SupplierInvoiceDraft.find({_id:id},function(err,data){    
+        var invoice = {       
+            date : data[0].date,
+            duedate : data[0].duedate,
+            invoiceid: data[0].invoiceid ,
+            reference: data[0].reference  ,
+            products: data[0].products ,
+            totalamount: data[0].totalamount  ,       
+            additionaldetails: data[0].additionaldetails  ,
+            whose: data[0].whose  ,
+            customerid: data[0].customerid  ,
+            count:data[0].count      
+       }    
+        var invoice = new SupplierInvoice(invoice);
+        invoice.save(function(err,result){ 
+            if(err){
+                res.send({"msg":"Error while Deleting...Pls Try after some time"});
+            }
+            else{
+                    SupplierInvoiceDraft.deleteMany({_id :id}, function (err, _) {
+                        if (err) {
+                            res.send({"msg":"Error while Deleting...Pls Try after some time"});
+                        }
+                        else{
+                            res.send({"msg":"Aproved Successfully"});
+                        }
+                    });            }
+        });
+    });  
 });
 app.post('/getCustomerDetails',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
     CustomerDetails.find({_id:req.body.id}, function (err, docs) {
+       res.send(docs);
+    });  
+});
+app.post('/getSupplierDetails',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    SupplierDetails.find({_id:req.body.id}, function (err, docs) {
        res.send(docs);
     });  
 });
@@ -969,10 +1091,24 @@ app.post('/getAllInvoioceOfACustomer',function(req,res){
        res.send(docs);
     });  
 });
+app.post('/getAllInvoioceOfASupplier',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    SupplierInvoice.find({whose:req.body.whose,customerid:req.body.customerid}, function (err, docs) {
+       res.send(docs);
+    });  
+});
 app.post('/getAllInvoioceOfACustomerDraft',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
     CustomerInvoiceDraft.find({whose:req.body.whose,customerid:req.body.customerid}, function (err, docs) {
+       res.send(docs);
+    });  
+});
+app.post('/getAllInvoioceOfASupplierDraft',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    SupplierInvoiceDraft.find({whose:req.body.whose,customerid:req.body.customerid}, function (err, docs) {
        res.send(docs);
     });  
 });
@@ -995,7 +1131,25 @@ app.post('/updateCustomer',function(req,res){
         }
     });
 });
-
+app.post('/updateSupplier',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;
+    var userFullName = req.body.userFullName;
+    var userEmailId = req.body.userEmailId;
+    var userContactNo= req.body.userContactNo;
+    var userAddress= req.body.userAddress;
+   
+    SupplierDetails.updateOne({_id :id}, 
+        {userFullName:userFullName,userEmailId:userEmailId,userContactNo:userContactNo,userAddress:userAddress}, function (err, docs) {
+        if (err){
+            res.send({"msg":"Database Error"});
+        }
+        else{
+            res.send({"msg":"successfully Updated"});
+        }
+    });
+});
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
 });
