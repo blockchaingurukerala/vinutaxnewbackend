@@ -15,7 +15,8 @@ var NewUserSchema = new Schema({
     additionaldetails:String ,
     count:Number,
     whose:String,
-    customerid:String
+    customerid:String,
+    customername:String
 });
 var CustomerInvoice = mongoose.model('customerinvoice', NewUserSchema);                        //UserData is the model and NewBookData is the schema
 module.exports = CustomerInvoice;

@@ -514,14 +514,14 @@ app.post('/addCustomerDetils',function(req,res){
         userWhose: req.body.whose        
    }       
    var user = new CustomerDetails(user);
-   CustomerDetails.find({userEmailId:req.body.email,userWhose:req.body.whose}, function (err, docs) {
-        if (docs.length){            
-            res.send({"msg":docs[0]._id});            
+//    CustomerDetails.find({userEmailId:req.body.email,userWhose:req.body.whose}, function (err, docs) {
+//         if (docs.length){            
+//             res.send({"msg":docs[0]._id});            
 
-        }else{
+//         }else{
             user.save(function(err,result){ 
                 if (err){ 
-                   // console.log(err); 
+                    //console.log(err); 
                     res.send({"msg":"Database Error"});
                 } 
                 else{    
@@ -529,8 +529,8 @@ app.post('/addCustomerDetils',function(req,res){
                    res.send({"msg":result._id});
                 } 
             }) ;
-        }
-    }); 
+    //     }
+    // }); 
 });
 app.post('/addSupplierDetils',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
@@ -543,11 +543,11 @@ app.post('/addSupplierDetils',function(req,res){
         userWhose: req.body.whose        
    }       
    var user = new SupplierDetails(user);
-   SupplierDetails.find({userEmailId:req.body.email,userWhose:req.body.whose}, function (err, docs) {
-        if (docs.length){            
-            res.send({"msg":docs[0]._id});            
+//    SupplierDetails.find({userEmailId:req.body.email,userWhose:req.body.whose}, function (err, docs) {
+//         if (docs.length){            
+//             res.send({"msg":docs[0]._id});            
 
-        }else{
+//         }else{
             user.save(function(err,result){ 
                 if (err){ 
                    // console.log(err); 
@@ -558,8 +558,8 @@ app.post('/addSupplierDetils',function(req,res){
                    res.send({"msg":result._id});
                 } 
             }) ;
-        }
-    }); 
+    //     }
+    // }); 
 });
 app.post('/addCustomerInvoice',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
@@ -574,7 +574,8 @@ app.post('/addCustomerInvoice',function(req,res){
         additionaldetails: req.body.additionaldetails  ,
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
-        count:0        
+        count:0  ,
+        customername:req.body.customername      
    }       
     var invoice = new CustomerInvoice(invoice);
     invoice.save(function(err,result){ 
@@ -646,7 +647,8 @@ app.post('/addSupplierInvoice',function(req,res){
         additionaldetails: req.body.additionaldetails  ,
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
-        count:0        
+        count:0  ,
+        customername:req.body.customername        
    }       
     var invoice = new SupplierInvoice(invoice);
     invoice.save(function(err,result){ 
@@ -672,7 +674,8 @@ app.post('/addCustomerInvoiceDraft',function(req,res){
         additionaldetails: req.body.additionaldetails  ,
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
-        count:0        
+        count:0    ,
+        customername:req.body.customername      
    }       
     var invoice = new CustomerInvoiceDraft(invoice);
     invoice.save(function(err,result){ 
@@ -744,7 +747,8 @@ app.post('/addSupplierInvoiceDraft',function(req,res){
         additionaldetails: req.body.additionaldetails  ,
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
-        count:0        
+        count:0 ,
+        customername:req.body.customername         
    }       
     var invoice = new SupplierInvoiceDraft(invoice);
     invoice.save(function(err,result){ 
