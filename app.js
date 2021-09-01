@@ -1025,6 +1025,7 @@ app.post('/aprovedraftinvoice',function(req,res){
             additionaldetails: data[0].additionaldetails  ,
             whose: data[0].whose  ,
             customerid: data[0].customerid  ,
+            customername:data[0].customername,
             count:data[0].count      
        }    
         var invoice = new CustomerInvoice(invoice);
@@ -1060,6 +1061,7 @@ app.post('/aprovedraftinvoiceSupplier',function(req,res){
             additionaldetails: data[0].additionaldetails  ,
             whose: data[0].whose  ,
             customerid: data[0].customerid  ,
+            customername:data[0].customername,
             count:data[0].count      
        }    
         var invoice = new SupplierInvoice(invoice);
