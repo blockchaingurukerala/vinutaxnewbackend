@@ -1161,6 +1161,58 @@ app.post('/updateSupplier',function(req,res){
         }
     });
 });
+app.post('/deleteCustomer',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;  
+    CustomerInvoice.find({customerid:id}, function (err, docs) {
+        if (docs.length){            
+            res.send({"msg":"Cannot Delete...Invoice available"});            
+
+        }else{ 
+            CustomerInvoiceDraft.find({customerid:id}, function (err, docs) {
+                if (docs.length){            
+                    res.send({"msg":"Cannot Delete ...Draft Invoice available"});
+                }else{ 
+                    CustomerDetails.deleteMany({_id :id}, function (err, _) {
+                        if (err) {
+                            res.send({"msg":"Error while Deleting...Pls Try after some time"});
+                        }
+                        else{
+                            res.send({"msg":"Deleted"});
+                        }
+                    }); 
+                } 
+            });
+        } 
+    });   
+});
+app.post('/deleteSupplier',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;  
+    SupplierInvoice.find({customerid:id}, function (err, docs) {
+        if (docs.length){            
+            res.send({"msg":"Cannot Delete...Invoice available"});            
+
+        }else{ 
+            SupplierInvoiceDraft.find({customerid:id}, function (err, docs) {
+                if (docs.length){            
+                    res.send({"msg":"Cannot Delete ...Draft Invoice available"});
+                }else{ 
+                    SupplierDetails.deleteMany({_id :id}, function (err, _) {
+                        if (err) {
+                            res.send({"msg":"Error while Deleting...Pls Try after some time"});
+                        }
+                        else{
+                            res.send({"msg":"Deleted"});
+                        }
+                    }); 
+                } 
+            });
+        } 
+    });   
+});
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
 });
