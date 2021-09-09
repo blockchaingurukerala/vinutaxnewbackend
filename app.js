@@ -239,14 +239,22 @@ app.post('/insertNewCategory',function(req,res){
         category : req.body.category               
    }       
    var categorynew = new Category(newcategory);
-   categorynew.save(function(err,result){ 
-        if (err){             
-            res.send({"msg":"Database Error"});
-        } 
-        else{          
-            res.send({"msg":"Successfully Inserted"});
-        } 
-    }) ;   
+   Category.find({category:req.body.category}, function (err, docs) {
+        if (docs.length){            
+            res.send({"msg":"Category Exists"});
+        }else{
+            categorynew.save(function(err,result){ 
+                if (err){             
+                    res.send({"msg":"Database Error"});
+                } 
+                else{          
+                    res.send({"msg":"Successfully Inserted"});
+                } 
+            }) ; 
+           
+        }
+    });   
+ 
 });
 app.post('/insertNewExpenceCategory',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
@@ -256,15 +264,22 @@ app.post('/insertNewExpenceCategory',function(req,res){
         category : req.body.category               
    }       
    var categorynew = new ExpenceCategory(newcategory);
-   categorynew.save(function(err,result){ 
-        if (err){ 
-            console.log(err); 
-            res.send({"msg":"Database Error"});
-        } 
-        else{            
-            res.send({"msg":"Successfully Inserted"});
-        } 
-    }) ;   
+   ExpenceCategory.find({category:req.body.category}, function (err, docs) {
+        if (docs.length){            
+            res.send({"msg":"Category Exists"});
+        }else{
+            categorynew.save(function(err,result){ 
+                if (err){             
+                    res.send({"msg":"Database Error"});
+                } 
+                else{          
+                    res.send({"msg":"Successfully Inserted"});
+                } 
+            }) ; 
+        
+        }
+    }); 
+  
 });
 app.get('/getCategories',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
@@ -416,7 +431,7 @@ app.post('/modifyIncomes',function(req,res){
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
      var email=req.body.email;         
      var originalincomes=req.body.originalincomes;  
-     var modifiedincomes=req.body.modifiedincomes;  
+     var modifiedincomes=req.body.modifiedincomes;      
      var flag=0;
      modifiedincomes.forEach(income => {
         UserData.updateOne({userEmailId:email,'incomes.id': income.id}, {'$set': {
@@ -575,7 +590,8 @@ app.post('/addCustomerInvoice',function(req,res){
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
         count:0  ,
-        customername:req.body.customername      
+        customername:req.body.customername,
+        allocated:false      
    }       
     var invoice = new CustomerInvoice(invoice);
     invoice.save(function(err,result){ 
@@ -648,7 +664,8 @@ app.post('/addSupplierInvoice',function(req,res){
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
         count:0  ,
-        customername:req.body.customername        
+        customername:req.body.customername   ,
+        allocated:false     
    }       
     var invoice = new SupplierInvoice(invoice);
     invoice.save(function(err,result){ 
@@ -675,7 +692,8 @@ app.post('/addCustomerInvoiceDraft',function(req,res){
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
         count:0    ,
-        customername:req.body.customername      
+        customername:req.body.customername ,
+        allocated:false     
    }       
     var invoice = new CustomerInvoiceDraft(invoice);
     invoice.save(function(err,result){ 
@@ -748,7 +766,8 @@ app.post('/addSupplierInvoiceDraft',function(req,res){
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
         count:0 ,
-        customername:req.body.customername         
+        customername:req.body.customername   ,
+        allocated:false      
    }       
     var invoice = new SupplierInvoiceDraft(invoice);
     invoice.save(function(err,result){ 
@@ -1026,7 +1045,8 @@ app.post('/aprovedraftinvoice',function(req,res){
             whose: data[0].whose  ,
             customerid: data[0].customerid  ,
             customername:data[0].customername,
-            count:data[0].count      
+            count:data[0].count,
+            allocated:data[0].allocated      
        }    
         var invoice = new CustomerInvoice(invoice);
         invoice.save(function(err,result){ 
@@ -1062,7 +1082,8 @@ app.post('/aprovedraftinvoiceSupplier',function(req,res){
             whose: data[0].whose  ,
             customerid: data[0].customerid  ,
             customername:data[0].customername,
-            count:data[0].count      
+            count:data[0].count ,
+            allocated:data[0].allocated        
        }    
         var invoice = new SupplierInvoice(invoice);
         invoice.save(function(err,result){ 
