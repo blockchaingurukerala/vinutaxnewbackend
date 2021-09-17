@@ -303,13 +303,27 @@ app.get('/getExpenceCategories',function(req,res){
         }
     });    
 });
+// app.post('/updateIncomes',function(req,res){
+//     res.header("Access-Control-Allow-Origin", "*")
+//     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
+//      var email=req.body.email;         
+//      var incomes=req.body.incomes;     
+//     UserData.updateOne({userEmailId:email},{
+//         $push: {"incomes": {$each: incomes}} 
+//     },
+//     function(err, doc){
+//         if (err) {console.log(err);res.send({"msg":"Error in updating"});}
+//         else{ res.send({"msg":"Updated"});}
+//     });
+   
+// });
 app.post('/updateIncomes',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
      var email=req.body.email;         
      var incomes=req.body.incomes;     
     UserData.updateOne({userEmailId:email},{
-        $push: {"incomes": {$each: incomes}} 
+        $push: {"incomes":incomes} 
     },
     function(err, doc){
         if (err) {console.log(err);res.send({"msg":"Error in updating"});}
@@ -317,6 +331,20 @@ app.post('/updateIncomes',function(req,res){
     });
    
 });
+// app.post('/updateExpences',function(req,res){
+//     res.header("Access-Control-Allow-Origin", "*")
+//     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
+//      var email=req.body.email;         
+//      var expences=req.body.expences;  
+      
+//     UserData.updateOne({userEmailId:email},{
+//         $push: {"expences": {$each: expences}} 
+//     },
+//     function(err, doc){
+//         if (err) {console.log(err);res.send({"msg":"Error in updating"});}
+//         else{ res.send({"msg":"Updated"});}
+//     });   
+// });
 app.post('/updateExpences',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
@@ -324,7 +352,7 @@ app.post('/updateExpences',function(req,res){
      var expences=req.body.expences;  
       
     UserData.updateOne({userEmailId:email},{
-        $push: {"expences": {$each: expences}} 
+        $push: {"expences": expences} 
     },
     function(err, doc){
         if (err) {console.log(err);res.send({"msg":"Error in updating"});}
