@@ -619,6 +619,8 @@ app.post('/addCustomerInvoice',function(req,res){
         customerid: req.body.customerid  ,
         count:0  ,
         customername:req.body.customername,
+        allocatedDetails:[],
+        allocatedAmount:0,
         allocated:false      
    }       
     var invoice = new CustomerInvoice(invoice);
@@ -693,7 +695,9 @@ app.post('/addSupplierInvoice',function(req,res){
         customerid: req.body.customerid  ,
         count:0  ,
         customername:req.body.customername   ,
-        allocated:false     
+        allocatedDetails:[],
+        allocatedAmount:0,
+        allocated:false        
    }       
     var invoice = new SupplierInvoice(invoice);
     invoice.save(function(err,result){ 
@@ -721,7 +725,9 @@ app.post('/addCustomerInvoiceDraft',function(req,res){
         customerid: req.body.customerid  ,
         count:0    ,
         customername:req.body.customername ,
-        allocated:false     
+        allocatedDetails:[],
+        allocatedAmount:0,
+        allocated:false       
    }       
     var invoice = new CustomerInvoiceDraft(invoice);
     invoice.save(function(err,result){ 
@@ -795,7 +801,9 @@ app.post('/addSupplierInvoiceDraft',function(req,res){
         customerid: req.body.customerid  ,
         count:0 ,
         customername:req.body.customername   ,
-        allocated:false      
+        allocatedDetails:[],
+        allocatedAmount:0,
+        allocated:false         
    }       
     var invoice = new SupplierInvoiceDraft(invoice);
     invoice.save(function(err,result){ 
@@ -1074,6 +1082,8 @@ app.post('/aprovedraftinvoice',function(req,res){
             customerid: data[0].customerid  ,
             customername:data[0].customername,
             count:data[0].count,
+            allocatedDetails:data[0].allocatedDetails,
+            allocatedAmount:data[0].allocatedAmount,
             allocated:data[0].allocated      
        }    
         var invoice = new CustomerInvoice(invoice);
@@ -1111,7 +1121,9 @@ app.post('/aprovedraftinvoiceSupplier',function(req,res){
             customerid: data[0].customerid  ,
             customername:data[0].customername,
             count:data[0].count ,
-            allocated:data[0].allocated        
+            allocatedDetails:data[0].allocatedDetails,
+            allocatedAmount:data[0].allocatedAmount,
+            allocated:data[0].allocated          
        }    
         var invoice = new SupplierInvoice(invoice);
         invoice.save(function(err,result){ 

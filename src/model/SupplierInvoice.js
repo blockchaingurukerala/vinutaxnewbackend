@@ -17,6 +17,8 @@ var NewUserSchema = new Schema({
     whose:String,
     customerid:String,
     customername:String,
+    allocatedDetails:[],
+    allocatedAmount:Number,
     allocated:Boolean
 });
 var SupplierInvoice = mongoose.model('supplierinvoice', NewUserSchema);                        //UserData is the model and NewBookData is the schema
