@@ -859,7 +859,13 @@ app.post('/getAllCustomerInvoioce',function(req,res){
        res.send(docs);
     });  
 });
-
+app.post('/getAllSupplierNegativeInvoioce',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    SupplierInvoice.find({whose:req.body.whose,totalamount:{$lt:0}}, function (err, docs) {
+       res.send(docs);
+    });  
+});
 app.post('/getAllSupplierInvoioce',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
