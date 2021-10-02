@@ -860,6 +860,54 @@ app.post('/getAllCustomerInvoioce',function(req,res){
     });  
 });
 
+
+app.post('/allocateToCustomerInvoice',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    console.log("controle here")
+    CustomerInvoice.updateOne({whose:req.body.whose,_id:req.body.id},{
+        $push: {"allocatedDetails":{"date":req.body.date,"allocatedAmount":req.body.allocatedAmount}},
+         $inc: { allocatedAmount: req.body.allocatedAmount } 
+    } 
+    ,
+    function(err, doc){
+        console.log("updating")
+        if (err) {console.log(err);res.send({"msg":"Error in updating"});}
+        else{ 
+            CustomerInvoice.updateMany({whose:req.body.whose,_id:req.body.id,allocatedAmount:req.body.totalamount},{
+                allocated:true
+             },
+             function(err, doc){
+                 if (err) {console.log(err);res.send({"msg":"Error in updating"});}
+                 else{ res.send({"msg":"Updated"});}
+             });           
+        }
+    });
+});
+app.post('/allocateToSupplierInvoice',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    console.log("controle here")
+    SupplierInvoice.updateOne({whose:req.body.whose,_id:req.body.id},{
+        $push: {"allocatedDetails":{"date":req.body.date,"allocatedAmount":req.body.allocatedAmount}},
+         $inc: { allocatedAmount: req.body.allocatedAmount } 
+    } 
+    ,
+    function(err, doc){
+        console.log("updating")
+        if (err) {console.log(err);res.send({"msg":"Error in updating"});}
+        else{ 
+            SupplierInvoice.updateMany({whose:req.body.whose,_id:req.body.id,allocatedAmount:req.body.totalamount},{
+                allocated:true
+             },
+             function(err, doc){
+                 if (err) {console.log(err);res.send({"msg":"Error in updating"});}
+                 else{ res.send({"msg":"Updated"});}
+             });           
+        }
+    });
+});
+
 app.post('/getAllCustomerInvoioceUnallocated',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
@@ -888,6 +936,7 @@ app.post('/getAllCustomerNegativeInvoioceUnallocated',function(req,res){
        res.send(docs);
     });      
 });
+
 app.post('/getAllSupplierInvoioce',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
@@ -1220,7 +1269,6 @@ app.post('/updateCustomer',function(req,res){
     var userEmailId = req.body.userEmailId;
     var userContactNo= req.body.userContactNo;
     var userAddress= req.body.userAddress;
-   
     CustomerDetails.updateOne({_id :id}, 
         {userFullName:userFullName,userEmailId:userEmailId,userContactNo:userContactNo,userAddress:userAddress}, function (err, docs) {
         if (err){
