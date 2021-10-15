@@ -13,6 +13,7 @@ const SupplierInvoice=require('./src/model/SupplierInvoice');
 const CustomerInvoiceDraft=require('./src/model/CustomerInvoiceDraft');
 const SupplierInvoiceDraft=require('./src/model/SupplierInvoiceDraft');
 
+const CashAccount=require('./src/model/CashAccount');
 
 var app=new express();
 var bodyParser=require('body-parser');
@@ -153,7 +154,7 @@ function callApi(resource, res, bearerToken) {
       log.error('Handling error response: ', err);
       res.send(err);
     } else {
-        console.log(apiResponse.body)
+        //console.log(apiResponse.body)
         //res.send(apiResponse.body);
         res.redirect("http://localhost:4200/displayfromhmrc"+"/?str="+JSON.stringify(apiResponse.body));
     }
@@ -162,7 +163,7 @@ function callApi(resource, res, bearerToken) {
 app.get('/testdeploy',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
-    console.log("Test deploy.....");    
+    //console.log("Test deploy.....");    
     res.send({"msg":"Successfully deployed"});
 });
 
@@ -864,14 +865,14 @@ app.post('/getAllCustomerInvoioce',function(req,res){
 app.post('/allocateToCustomerInvoice',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
-    console.log("controle here")
+   
     CustomerInvoice.updateOne({whose:req.body.whose,_id:req.body.id},{
         $push: {"allocatedDetails":{"date":req.body.date,"allocatedAmount":req.body.allocatedAmount}},
          $inc: { allocatedAmount: req.body.allocatedAmount } 
     } 
     ,
     function(err, doc){
-        console.log("updating")
+ 
         if (err) {console.log(err);res.send({"msg":"Error in updating"});}
         else{ 
             CustomerInvoice.updateMany({whose:req.body.whose,_id:req.body.id,allocatedAmount:req.body.totalamount},{
@@ -887,14 +888,14 @@ app.post('/allocateToCustomerInvoice',function(req,res){
 app.post('/allocateToSupplierInvoice',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
-    console.log("controle here")
+   
     SupplierInvoice.updateOne({whose:req.body.whose,_id:req.body.id},{
         $push: {"allocatedDetails":{"date":req.body.date,"allocatedAmount":req.body.allocatedAmount}},
          $inc: { allocatedAmount: req.body.allocatedAmount } 
     } 
     ,
     function(err, doc){
-        console.log("updating")
+       
         if (err) {console.log(err);res.send({"msg":"Error in updating"});}
         else{ 
             SupplierInvoice.updateMany({whose:req.body.whose,_id:req.body.id,allocatedAmount:req.body.totalamount},{
@@ -1350,6 +1351,94 @@ app.post('/deleteSupplier',function(req,res){
         } 
     });   
 });
+app.post('/createNextCashAccountNumber',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
+    var findQuery = CashAccount.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+    findQuery.exec(function(err, maxResult){
+        if (err) { res.send({"msg":"Error in Creating CashAccount Number"});}
+        else { 
+            if(maxResult.length>0) {
+                if( maxResult[0].count){
+                    res.send({"msg":"CH-0"+(maxResult[0].count+1)});               
+                }
+                else{
+                    res.send({"msg":"CH-01"});                           
+                } 
+            }  
+            else{
+                res.send({"msg":"CH-01"});   
+            }              
+        }
+    });
+});
+
+app.post('/addCashAccount',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
+    var cashaccount1 = {      
+        cashaccountid : req.body.payment.id,
+        date : req.body.payment.date,
+        amount: req.body.payment.amount ,
+        autoamount:-1*req.body.payment.amount ,
+        description: req.body.payment.description  ,
+        category: req.body.payment.category ,  
+        count:0  ,  
+        whose: req.body.whose 
+   }          
+    var cashaccount = new CashAccount(cashaccount1);    
+    cashaccount.save(function(err,result){ 
+        if (err){ 
+            console.log(err); 
+            res.send({"msg":"Database Error"});
+        } 
+        else{            
+            var findQuery = CashAccount.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+            findQuery.exec(function(err, maxResult){
+                if (err) { res.send({"msg":"Error in updating cashAccount Count Number"});}
+                else { 
+                    if(maxResult.length>0) {
+                        CashAccount.updateMany({whose:req.body.whose}, 
+                            {count:maxResult[0].count+1}, function (err, docs) {
+                            if (err){
+                                res.send({"msg":"Error in updating cashAccount Count Number"});
+                            }
+                            else{                                 
+                                res.send({"msg":"Successfully Saved"});
+                            }
+                        });
+                    }
+                    else{
+                        CashAccount.updateMany({whose:req.body.whose}, 
+                            {count:1}, function (err, docs) {
+                            if (err){
+                                res.send({"msg":"Error in updating cashAccount Count Number"});
+                            }
+                            else{                                
+                                res.send({"msg":"Successfully Saved"});
+                            }
+                        });
+                    }
+                }
+            });
+               
+        } 
+    }) ;
+});
+
+app.post('/getAllCashAccounts',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var email=req.body.email;    
+    CashAccount.find({whose:email}, function (err, docs) {
+        if (docs.length){            
+            res.send(docs);
+        }else{
+            res.send({"msg":"Available"});
+        }
+    });    
+});
+
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
 });
