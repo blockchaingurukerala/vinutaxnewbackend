@@ -235,26 +235,58 @@ app.post('/checkAvailabilityExpenceCategory',function(req,res){
 app.post('/insertNewCategory',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
-    
-    var newcategory = {       
-        category : req.body.category               
-   }       
-   var categorynew = new Category(newcategory);
-   Category.find({category:req.body.category}, function (err, docs) {
+    var titlecategory=req.body.titlecategory;      
+    var category = req.body.category   ;  
+       Category.find({titlecategory:req.body.titlecategory}, function (err, docs) {
         if (docs.length){            
-            res.send({"msg":"Category Exists"});
+            // if exists
+                Category.updateOne({titlecategory:titlecategory},{
+                    $push: {"category": category} 
+                },
+                function(err, doc){
+                    if (err) {console.log(err);res.send({"msg":"Error in inserting"});}
+                    else{ res.send({"msg":"Inserted"});}
+                });
+
         }else{
-            categorynew.save(function(err,result){ 
-                if (err){             
-                    res.send({"msg":"Database Error"});
-                } 
-                else{          
-                    res.send({"msg":"Successfully Inserted"});
-                } 
-            }) ; 
-           
+                var newcategory = { 
+                    titlecategory:req.body.titlecategory,      
+                    category :[req.body.category]              
+                }       
+                var categorynew = new Category(newcategory);
+                categorynew.save(function(err,result){ 
+                    if (err){             
+                        res.send({"msg":"Database Error"});
+                    } 
+                    else{          
+                        res.send({"msg":"Successfully Inserted"});
+                    } 
+                }) ; 
         }
-    });   
+    });  
+
+  
+
+//     var newcategory = { 
+//         titlecategory:req.body.titlecategory,      
+//         category : req.body.category               
+//    }       
+//    var categorynew = new Category(newcategory);
+//    Category.find({category:req.body.category}, function (err, docs) {
+//         if (docs.length){            
+//             res.send({"msg":"Category Exists"});
+//         }else{
+//             categorynew.save(function(err,result){ 
+//                 if (err){             
+//                     res.send({"msg":"Database Error"});
+//                 } 
+//                 else{          
+//                     res.send({"msg":"Successfully Inserted"});
+//                 } 
+//             }) ; 
+           
+//         }
+//     });   
  
 });
 app.post('/insertNewExpenceCategory',function(req,res){
