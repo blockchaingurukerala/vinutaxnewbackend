@@ -907,16 +907,133 @@ app.post('/allocateToCustomerInvoice',function(req,res){
  
         if (err) {console.log(err);res.send({"msg":"Error in updating"});}
         else{ 
-            CustomerInvoice.updateMany({whose:req.body.whose,_id:req.body.id,allocatedAmount:req.body.totalamount},{
+            CustomerInvoice.updateMany({whose:req.body.whose,_id:req.body.id,allocatedAmount:-1*req.body.totalamount},{
                 allocated:true
              },
              function(err, doc){
                  if (err) {console.log(err);res.send({"msg":"Error in updating"});}
                  else{ res.send({"msg":"Updated"});}
-             });           
+             });  
+
+             //code here to add in cash account begins
+             CustomerInvoice.find({whose:req.body.whose,_id:req.body.id}, async function (err, docs) {
+                console.log(docs[0].products)
+                var tocashaccount=[];       
+                var q=0;
+                var p=0;
+                for(q=0;q<docs[0].products.length;q++){
+                 var allocation=(docs[0].products[q].price*docs[0].products[q].qty)*req.body.allocatedAmount/docs[0].totalamount;
+                 tocashaccount.push({"category":docs[0].products[q].category,"amount":allocation,"date":req.body.date});
+                }
+               
+                for(q=0;q<tocashaccount.length;q++){           
+                     for(p=q+1;p<tocashaccount.length;p++){
+                         if(tocashaccount[q].category==tocashaccount[p].category){
+                             tocashaccount[q].amount= tocashaccount[q].amount+tocashaccount[p].amount;
+                             tocashaccount.splice(p,1)
+                             p--;
+                         }
+                     }
+                }
+                 //add to cash accouont;
+                 //console.log("cashaccountnumber="+cashaccountnumber);
+                 var z=0;
+                 for(z=0;z<tocashaccount.length;z++){            
+                    //var id= await gerratecashaccountnmber(req.body.whose);  
+                    var cashaccountnumber="";
+                    await new Promise (resolve => {                
+                        var findQuery = CashAccount.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+                        findQuery.exec(function(err, maxResult){
+                            if (err) { cashaccountnumber= "error";resolve(); }
+                            else { 
+                                if(maxResult.length>0) {
+                                    if( maxResult[0].count){
+                                        cashaccountnumber= "CH-0"+(maxResult[0].count+1)   ;          
+                                    }
+                                    else{
+                                        cashaccountnumber= "CH-01" ;                          
+                                    } 
+                                }  
+                                else{
+                                    cashaccountnumber= "CH-01" ;     
+                                }  
+                               // return cashaccountnumber;
+                                resolve(); 
+                            }
+                        });              
+                                       
+                     }); 
+                    console.log("z="+z+",id="+cashaccountnumber)   
+                    //Add to cash account
+                    await new Promise (resolve1 => {
+                         var cashaccount1 = {      
+                             cashaccountid : cashaccountnumber,
+                             date :tocashaccount[z].date,
+                             amount: -1*tocashaccount[z].amount ,
+                             autoamount:tocashaccount[z].amount  ,
+                             description: "Invoice Matching" ,
+                             category: tocashaccount[z].category ,  
+                             count:0  ,  
+                             whose: req.body.whose 
+                         }          
+                         var cashaccount = new CashAccount(cashaccount1);    
+                         cashaccount.save(function(err,result){ 
+                             if (err){ 
+                                 console.log(err); 
+                                 res.send({"msg":"Database Error"});
+                                 resolve1();
+                             } 
+                             else{            
+                                 var findQuery = CashAccount.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+                                 findQuery.exec(function(err, maxResult){
+                                     if (err) { 
+                                        // res.send({"msg":"Error in updating cashAccount Count Number"});
+                                         resolve1();}
+                                     else { 
+                                         if(maxResult.length>0) {
+                                             CashAccount.updateMany({whose:req.body.whose}, 
+                                                 {count:maxResult[0].count+1}, function (err, docs) {
+                                                 if (err){
+                                                    // res.send({"msg":"Error in updating cashAccount Count Number"});
+                                                     resolve1();
+                                                 }
+                                                 else{                                 
+                                                     //res.send({"msg":"Successfully Saved"});
+                                                     resolve1();
+                                                 }
+                                             });
+                                         }
+                                         else{
+                                             CashAccount.updateMany({whose:req.body.whose}, 
+                                                 {count:1}, function (err, docs) {
+                                                 if (err){
+                                                     //res.send({"msg":"Error in updating cashAccount Count Number"});
+                                                     resolve1();
+                                                 }
+                                                 else{                                
+                                                    // res.send({"msg":"Successfully Saved"});
+                                                     resolve1();
+                                                 }
+                                             });
+                                         }
+                                     }
+                                 });
+                                 
+                             } 
+                         }) ;
+                         //added to cash account
+                     });
+                 } //end for loop
+             });
+
+            //code here to add in cash account ends  
+             
+             
         }
     });
 });
+
+
 app.post('/allocateToSupplierInvoice',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
@@ -936,15 +1053,130 @@ app.post('/allocateToSupplierInvoice',function(req,res){
              function(err, doc){
                  if (err) {console.log(err);res.send({"msg":"Error in updating"});}
                  else{ res.send({"msg":"Updated"});}
-             });           
+             }); 
+             //code here to add in cash account begins
+             SupplierInvoice.find({whose:req.body.whose,_id:req.body.id}, async function (err, docs) {
+                console.log(docs[0].products)
+                var tocashaccount=[];       
+                var q=0;
+                var p=0;
+                for(q=0;q<docs[0].products.length;q++){
+                 var allocation=(docs[0].products[q].price*docs[0].products[q].qty)*req.body.allocatedAmount/docs[0].totalamount;
+                 tocashaccount.push({"category":docs[0].products[q].category,"amount":allocation,"date":req.body.date});
+                }
+               
+                for(q=0;q<tocashaccount.length;q++){           
+                     for(p=q+1;p<tocashaccount.length;p++){
+                         if(tocashaccount[q].category==tocashaccount[p].category){
+                             tocashaccount[q].amount= tocashaccount[q].amount+tocashaccount[p].amount;
+                             tocashaccount.splice(p,1)
+                             p--;
+                         }
+                     }
+                }
+                 //add to cash accouont;
+                 //console.log("cashaccountnumber="+cashaccountnumber);
+                 var z=0;
+                 for(z=0;z<tocashaccount.length;z++){            
+                    //var id= await gerratecashaccountnmber(req.body.whose);  
+                    var cashaccountnumber="";
+                    await new Promise (resolve => {                
+                        var findQuery = CashAccount.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+                        findQuery.exec(function(err, maxResult){
+                            if (err) { cashaccountnumber= "error";resolve(); }
+                            else { 
+                                if(maxResult.length>0) {
+                                    if( maxResult[0].count){
+                                        cashaccountnumber= "CH-0"+(maxResult[0].count+1)   ;          
+                                    }
+                                    else{
+                                        cashaccountnumber= "CH-01" ;                          
+                                    } 
+                                }  
+                                else{
+                                    cashaccountnumber= "CH-01" ;     
+                                }  
+                               // return cashaccountnumber;
+                                resolve(); 
+                            }
+                        });              
+                                       
+                     }); 
+                    console.log("z="+z+",id="+cashaccountnumber)   
+                    //Add to cash account
+                    await new Promise (resolve1 => {
+                         var cashaccount1 = {      
+                             cashaccountid : cashaccountnumber,
+                             date :tocashaccount[z].date,
+                             amount: -1*tocashaccount[z].amount ,
+                             autoamount:tocashaccount[z].amount  ,
+                             description: "Invoice Matching" ,
+                             category: tocashaccount[z].category ,  
+                             count:0  ,  
+                             whose: req.body.whose 
+                         }          
+                         var cashaccount = new CashAccount(cashaccount1);    
+                         cashaccount.save(function(err,result){ 
+                             if (err){ 
+                                 console.log(err); 
+                                 res.send({"msg":"Database Error"});
+                                 resolve1();
+                             } 
+                             else{            
+                                 var findQuery = CashAccount.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+                                 findQuery.exec(function(err, maxResult){
+                                     if (err) { 
+                                        // res.send({"msg":"Error in updating cashAccount Count Number"});
+                                         resolve1();}
+                                     else { 
+                                         if(maxResult.length>0) {
+                                             CashAccount.updateMany({whose:req.body.whose}, 
+                                                 {count:maxResult[0].count+1}, function (err, docs) {
+                                                 if (err){
+                                                    // res.send({"msg":"Error in updating cashAccount Count Number"});
+                                                     resolve1();
+                                                 }
+                                                 else{                                 
+                                                     //res.send({"msg":"Successfully Saved"});
+                                                     resolve1();
+                                                 }
+                                             });
+                                         }
+                                         else{
+                                             CashAccount.updateMany({whose:req.body.whose}, 
+                                                 {count:1}, function (err, docs) {
+                                                 if (err){
+                                                     //res.send({"msg":"Error in updating cashAccount Count Number"});
+                                                     resolve1();
+                                                 }
+                                                 else{                                
+                                                    // res.send({"msg":"Successfully Saved"});
+                                                     resolve1();
+                                                 }
+                                             });
+                                         }
+                                     }
+                                 });
+                                 
+                             } 
+                         }) ;
+                         //added to cash account
+                     });
+                 } //end for loop
+             });
+
+            //code here to add in cash account ends 
+             
         }
     });
 });
 
+
+
 app.post('/getAllCustomerInvoioceUnallocated',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
-    CustomerInvoice.find({whose:req.body.whose,allocated:false,totalamount:{$gt:0}}, function (err, docs) {
+    CustomerInvoice.find({whose:req.body.whose,allocated:false,totalamount:{$lt:0}}, function (err, docs) {
        res.send(docs);
     });  
 });
@@ -965,7 +1197,7 @@ app.post('/getAllSupplierInvoioceUnallocated',function(req,res){
 app.post('/getAllCustomerNegativeInvoioceUnallocated',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');      
-    CustomerInvoice.find({whose:req.body.whose,allocated:false,totalamount:{$lt:0}}, function (err, docs) {
+    CustomerInvoice.find({whose:req.body.whose,allocated:false,totalamount:{$gt:0}}, function (err, docs) {
        res.send(docs);
     });      
 });
