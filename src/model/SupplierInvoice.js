@@ -12,6 +12,7 @@ var NewUserSchema = new Schema({
     reference: String  ,
     products: [],
     totalamount: Number,
+    autototalamount:Number,
     additionaldetails:String ,
     count:Number,
     whose:String,

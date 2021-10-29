@@ -12,6 +12,7 @@ var NewUserSchema = new Schema({
     reference: String  ,
     products: [],
     totalamount: Number,
+    autototalamount:Number,
     additionaldetails:String ,
     count:Number,
     whose:String,
@@ -19,7 +20,8 @@ var NewUserSchema = new Schema({
     customername:String,
     allocatedDetails:[],
     allocatedAmount:Number,
-    allocated:Boolean
+    allocated:Boolean,
+    autototalamount:Number
 });
 var CustomerInvoice = mongoose.model('customerinvoice', NewUserSchema);                        //UserData is the model and NewBookData is the schema
 module.exports = CustomerInvoice;

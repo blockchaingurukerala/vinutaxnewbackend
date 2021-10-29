@@ -646,7 +646,8 @@ app.post('/addCustomerInvoice',function(req,res){
         invoiceid: req.body.invoiceid ,
         reference: req.body.reference  ,
         products: req.body.products ,
-        totalamount: req.body.totalamount  ,       
+        totalamount: req.body.totalamount  ,  
+        autototalamount:-1*req.body.totalamount,     
         additionaldetails: req.body.additionaldetails  ,
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
@@ -722,7 +723,8 @@ app.post('/addSupplierInvoice',function(req,res){
         invoiceid: req.body.invoiceid ,
         reference: req.body.reference  ,
         products: req.body.products ,
-        totalamount: req.body.totalamount  ,       
+        totalamount: req.body.totalamount  ,  
+        autototalamount:-1*req.body.totalamount,     
         additionaldetails: req.body.additionaldetails  ,
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
@@ -752,7 +754,8 @@ app.post('/addCustomerInvoiceDraft',function(req,res){
         invoiceid: req.body.invoiceid ,
         reference: req.body.reference  ,
         products: req.body.products ,
-        totalamount: req.body.totalamount  ,       
+        totalamount: req.body.totalamount  , 
+        autototalamount:-1*req.body.totalamount,      
         additionaldetails: req.body.additionaldetails  ,
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
@@ -828,7 +831,8 @@ app.post('/addSupplierInvoiceDraft',function(req,res){
         invoiceid: req.body.invoiceid ,
         reference: req.body.reference  ,
         products: req.body.products ,
-        totalamount: req.body.totalamount  ,       
+        totalamount: req.body.totalamount  , 
+        autototalamount:-1*req.body.totalamount,      
         additionaldetails: req.body.additionaldetails  ,
         whose: req.body.whose  ,
         customerid: req.body.customerid  ,
@@ -907,7 +911,8 @@ app.post('/allocateToCustomerInvoice',function(req,res){
  
         if (err) {console.log(err);res.send({"msg":"Error in updating"});}
         else{ 
-            CustomerInvoice.updateMany({whose:req.body.whose,_id:req.body.id,allocatedAmount:-1*req.body.totalamount},{
+
+            CustomerInvoice.updateMany({whose:req.body.whose,_id:req.body.id,allocatedAmount:req.body.totalamount},{
                 allocated:true
              },
              function(err, doc){
@@ -917,12 +922,13 @@ app.post('/allocateToCustomerInvoice',function(req,res){
 
              //code here to add in cash account begins
              CustomerInvoice.find({whose:req.body.whose,_id:req.body.id}, async function (err, docs) {
-                console.log(docs[0].products)
+                //console.log(docs[0].products)
                 var tocashaccount=[];       
                 var q=0;
                 var p=0;
                 for(q=0;q<docs[0].products.length;q++){
                  var allocation=(docs[0].products[q].price*docs[0].products[q].qty)*req.body.allocatedAmount/docs[0].totalamount;
+             
                  tocashaccount.push({"category":docs[0].products[q].category,"amount":allocation,"date":req.body.date});
                 }
                
@@ -963,14 +969,14 @@ app.post('/allocateToCustomerInvoice',function(req,res){
                         });              
                                        
                      }); 
-                    console.log("z="+z+",id="+cashaccountnumber)   
+                   
                     //Add to cash account
                     await new Promise (resolve1 => {
                          var cashaccount1 = {      
                              cashaccountid : cashaccountnumber,
                              date :tocashaccount[z].date,
-                             amount: -1*tocashaccount[z].amount ,
-                             autoamount:tocashaccount[z].amount  ,
+                             amount: tocashaccount[z].amount ,
+                             autoamount:-1*tocashaccount[z].amount  ,
                              description: "Invoice Matching" ,
                              category: tocashaccount[z].category ,  
                              count:0  ,  
@@ -1108,8 +1114,8 @@ app.post('/allocateToSupplierInvoice',function(req,res){
                          var cashaccount1 = {      
                              cashaccountid : cashaccountnumber,
                              date :tocashaccount[z].date,
-                             amount: -1*tocashaccount[z].amount ,
-                             autoamount:tocashaccount[z].amount  ,
+                             amount: tocashaccount[z].amount ,
+                             autoamount:-1*tocashaccount[z].amount  ,
                              description: "Invoice Matching" ,
                              category: tocashaccount[z].category ,  
                              count:0  ,  
@@ -1280,10 +1286,11 @@ app.post('/updteCustomerInvoice',function(req,res){
     var invoiceid= req.body.invoiceid;
     var reference= req.body.reference;
     var products=req.body.products;
-    var totalamount= req.body.totalamount;       
+    var totalamount= req.body.totalamount; 
+    var autototalamount=-1*req.body.totalamount;       
     var additionaldetails=req.body.additionaldetails;
     CustomerInvoice.updateOne({_id :id}, 
-        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,additionaldetails:additionaldetails}, function (err, docs) {
+        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,autototalamount:autototalamount,additionaldetails:additionaldetails}, function (err, docs) {
         if (err){
             res.send({"msg":"Database Error"});
         }
@@ -1301,10 +1308,11 @@ app.post('/updteSupplierInvoice',function(req,res){
     var invoiceid= req.body.invoiceid;
     var reference= req.body.reference;
     var products=req.body.products;
-    var totalamount= req.body.totalamount;       
+    var totalamount= req.body.totalamount;   
+    var autototalamount=-1*req.body.totalamount;        
     var additionaldetails=req.body.additionaldetails;
     SupplierInvoice.updateOne({_id :id}, 
-        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,additionaldetails:additionaldetails}, function (err, docs) {
+        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,autototalamount:autototalamount,additionaldetails:additionaldetails}, function (err, docs) {
         if (err){
             res.send({"msg":"Database Error"});
         }
@@ -1322,10 +1330,11 @@ app.post('/updteCustomerInvoiceDraft',function(req,res){
     var invoiceid= req.body.invoiceid;
     var reference= req.body.reference;
     var products=req.body.products;
-    var totalamount= req.body.totalamount;       
+    var totalamount= req.body.totalamount;  
+    var autototalamount=-1*req.body.totalamount;   
     var additionaldetails=req.body.additionaldetails;
     CustomerInvoiceDraft.updateOne({_id :id}, 
-        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,additionaldetails:additionaldetails}, function (err, docs) {
+        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,autototalamount:autototalamount,additionaldetails:additionaldetails}, function (err, docs) {
         if (err){
             res.send({"msg":"Database Error"});
         }
@@ -1343,10 +1352,11 @@ app.post('/updteSupplierInvoiceDraft',function(req,res){
     var invoiceid= req.body.invoiceid;
     var reference= req.body.reference;
     var products=req.body.products;
-    var totalamount= req.body.totalamount;       
+    var totalamount= req.body.totalamount;   
+    var autototalamount=-1*req.body.totalamount    
     var additionaldetails=req.body.additionaldetails;
     SupplierInvoiceDraft.updateOne({_id :id}, 
-        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,additionaldetails:additionaldetails}, function (err, docs) {
+        {date:date,duedate:duedate,invoiceid:invoiceid,reference:reference,products:products,totalamount:totalamount,autototalamount:autototalamount,additionaldetails:additionaldetails}, function (err, docs) {
         if (err){
             res.send({"msg":"Database Error"});
         }
@@ -1418,7 +1428,8 @@ app.post('/aprovedraftinvoice',function(req,res){
             invoiceid: data[0].invoiceid ,
             reference: data[0].reference  ,
             products: data[0].products ,
-            totalamount: data[0].totalamount  ,       
+            totalamount: data[0].totalamount  ,    
+            autototalamount:data[0].autototalamount,   
             additionaldetails: data[0].additionaldetails  ,
             whose: data[0].whose  ,
             customerid: data[0].customerid  ,
@@ -1457,7 +1468,8 @@ app.post('/aprovedraftinvoiceSupplier',function(req,res){
             invoiceid: data[0].invoiceid ,
             reference: data[0].reference  ,
             products: data[0].products ,
-            totalamount: data[0].totalamount  ,       
+            totalamount: data[0].totalamount  ,
+            autototalamount:data[0].autototalamount,       
             additionaldetails: data[0].additionaldetails  ,
             whose: data[0].whose  ,
             customerid: data[0].customerid  ,
