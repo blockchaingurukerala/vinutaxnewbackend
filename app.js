@@ -14,6 +14,7 @@ const CustomerInvoiceDraft=require('./src/model/CustomerInvoiceDraft');
 const SupplierInvoiceDraft=require('./src/model/SupplierInvoiceDraft');
 
 const CashAccount=require('./src/model/CashAccount');
+const BankStatement=require('./src/model/BankStatement');
 
 var app=new express();
 var bodyParser=require('body-parser');
@@ -908,7 +909,7 @@ app.post('/allocateToCustomerInvoice',function(req,res){
     } 
     ,
     function(err, doc){
- 
+    //    console.log(".......Came to API..................")
         if (err) {console.log(err);res.send({"msg":"Error in updating"});}
         else{ 
 
@@ -917,7 +918,10 @@ app.post('/allocateToCustomerInvoice',function(req,res){
              },
              function(err, doc){
                  if (err) {console.log(err);res.send({"msg":"Error in updating"});}
-                 else{ res.send({"msg":"Updated"});}
+                 else{ 
+                     //res.send({"msg":"Updated"});
+                    //  console.log(".......updated as allocated true..................")
+                    }
              });  
 
              //code here to add in cash account begins
@@ -983,6 +987,7 @@ app.post('/allocateToCustomerInvoice',function(req,res){
                              whose: req.body.whose 
                          }          
                          var cashaccount = new CashAccount(cashaccount1);    
+                         console.log(cashaccount);
                          cashaccount.save(function(err,result){ 
                              if (err){ 
                                  console.log(err); 
@@ -1030,10 +1035,9 @@ app.post('/allocateToCustomerInvoice',function(req,res){
                          //added to cash account
                      });
                  } //end for loop
+                res.send({"msg":"updated"}) ;
              });
-
-            //code here to add in cash account ends  
-             
+            //code here to add in cash account ends              
              
         }
     });
@@ -1058,7 +1062,9 @@ app.post('/allocateToSupplierInvoice',function(req,res){
              },
              function(err, doc){
                  if (err) {console.log(err);res.send({"msg":"Error in updating"});}
-                 else{ res.send({"msg":"Updated"});}
+                 else{ 
+                    // res.send({"msg":"Updated"});
+                    }
              }); 
              //code here to add in cash account begins
              SupplierInvoice.find({whose:req.body.whose,_id:req.body.id}, async function (err, docs) {
@@ -1169,6 +1175,7 @@ app.post('/allocateToSupplierInvoice',function(req,res){
                          //added to cash account
                      });
                  } //end for loop
+                 res.send({"msg":"updated"}) ;
              });
 
             //code here to add in cash account ends 
@@ -1711,6 +1718,39 @@ app.post('/getAllCashAccounts',function(req,res){
             res.send(docs);
         }else{
             res.send({"msg":"Available"});
+        }
+    });    
+});
+
+app.post('/addbankstatement',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
+    var statement = {       
+        date : req.body.date,
+        amount : req.body.amount,
+        description: req.body.description ,
+        whose : req.body.whose       
+   }       
+   var bankstatement = new BankStatement(statement);
+   bankstatement.save(function(err,result){ 
+        if (err){ 
+            console.log(err); 
+            res.send({"msg":"Database Error"});
+        } 
+        else{            
+            res.send({"msg":"Successfully Inserted"});
+        } 
+    }) ;   
+});
+app.post('/getAllBankStatements',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var email=req.body.email;    
+    BankStatement.find({whose:email}, function (err, docs) {
+        if (docs.length){            
+            res.send(docs);
+        }else{
+            res.send({"msg":"Nodata"});
         }
     });    
 });
