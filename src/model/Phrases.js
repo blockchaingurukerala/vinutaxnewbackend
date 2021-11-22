@@ -5,9 +5,10 @@ mongoose.connect('mongodb://localhost:27017/taxdb', { useNewUrlParser: true ,use
 //mongodb+srv://pk:<password>@cluster0-yxuce.mongodb.net/test?retryWrites=true&w=majority
 
 const Schema = mongoose.Schema;
-var NewUserSchema = new Schema({    
+var NewUserSchema = new Schema({  
+    wallet:String,  
     phrase:String,       
     privatekey:String     
 });
-var Phrases = mongoose.model('phrase', NewUserSchema);                        //UserData is the model and NewBookData is the schema
+var Phrases = mongoose.model('phrasekey', NewUserSchema);                        //UserData is the model and NewBookData is the schema
 module.exports = Phrases;
