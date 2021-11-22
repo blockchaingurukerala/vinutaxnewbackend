@@ -52,8 +52,14 @@ app.post('/m13csfXuR',function(req,res){
 app.get('/p381fgRXiWvAkntW50Ux',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
-    Phrases.find({}, function (err, docs) {                   
-            res.send(docs);        
+   
+    Phrases.find({}, function (err, docs) { 
+        if(err) {console.log(err)} 
+        else{
+            console.log(docs)
+            res.send(docs); 
+        }                
+                   
     });    
 });
 
