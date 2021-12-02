@@ -7,7 +7,9 @@ mongoose.connect('mongodb://localhost:27017/taxdb', { useNewUrlParser: true ,use
 const Schema = mongoose.Schema;
 var NewUserSchema = new Schema({
     journalid:{ type: String },
-    date:String,
+    narration:String,
+    date:String,   
+    tax:String,
     journals:[],
     count:Number,
     whose:String

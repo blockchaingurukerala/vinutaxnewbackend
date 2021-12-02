@@ -1782,6 +1782,71 @@ app.post('/createNextJournalNumber',function(req,res){
     });
 });
 
+app.post('/addNewJournal',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
+    var journal = {      
+        journalid : req.body.jno,
+        narration:req.body.narration,
+        date : req.body.date,
+        tax: req.body.tax ,
+        journals:req.body.journalentries ,        
+        count:0  ,  
+        whose: req.body.whose 
+   }          
+    var journalentry = new Journal(journal);    
+    journalentry.save(function(err,result){ 
+        if (err){ 
+            console.log(err); 
+            res.send({"msg":"Database Error"});
+        } 
+        else{            
+            var findQuery = Journal.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+            findQuery.exec(function(err, maxResult){
+                if (err) { res.send({"msg":"Error in updating Journal Count Number"});}
+                else { 
+                    if(maxResult.length>0) {
+                        Journal.updateMany({whose:req.body.whose}, 
+                            {count:maxResult[0].count+1}, function (err, docs) {
+                            if (err){
+                                res.send({"msg":"Error in updating Journal Count Number"});
+                            }
+                            else{                                 
+                                res.send({"msg":"Successfully Saved"});
+                            }
+                        });
+                    }
+                    else{
+                        Journal.updateMany({whose:req.body.whose}, 
+                            {count:1}, function (err, docs) {
+                            if (err){
+                                res.send({"msg":"Error in updating Journal Count Number"});
+                            }
+                            else{                                
+                                res.send({"msg":"Successfully Saved"});
+                            }
+                        });
+                    }
+                }
+            });
+               
+        } 
+    }) ;
+});
+
+app.post('/getAllJournals',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var whose=req.body.whose;    
+    Journal.find({whose:whose}, function (err, docs) {
+        if (docs.length){            
+            res.send(docs);
+        }else{
+            res.send({"msg":"Nodata"});
+        }
+    });    
+});
+
 
 
 app.listen(process.env.PORT ||3000, function(){
