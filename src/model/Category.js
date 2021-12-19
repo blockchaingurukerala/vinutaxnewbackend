@@ -11,5 +11,3 @@ var NewUserSchema = new Schema({
 });
 var Category = mongoose.model('category', NewUserSchema);                        //UserData is the model and NewBookData is the schema
 module.exports = Category;
-
-

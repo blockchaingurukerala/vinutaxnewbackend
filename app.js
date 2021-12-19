@@ -239,12 +239,13 @@ app.post('/insertNewCategory',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
     var titlecategory=req.body.titlecategory;      
-    var category = req.body.category   ;  
+    var category = req.body.category   ; 
+    var whose =  req.body.whose   ; 
        Category.find({titlecategory:req.body.titlecategory}, function (err, docs) {
         if (docs.length){            
             // if exists
                 Category.updateOne({titlecategory:titlecategory},{
-                    $push: {"category": category} 
+                    $push:{category: {"category": category,"whose":whose} }
                 },
                 function(err, doc){
                     if (err) {console.log(err);res.send({"msg":"Error in inserting"});}
@@ -254,7 +255,7 @@ app.post('/insertNewCategory',function(req,res){
         }else{
                 var newcategory = { 
                     titlecategory:req.body.titlecategory,      
-                    category :[req.body.category]              
+                    category :[{"category": category,"whose":whose}]              
                 }       
                 var categorynew = new Category(newcategory);
                 categorynew.save(function(err,result){ 
@@ -317,9 +318,12 @@ app.post('/insertNewExpenceCategory',function(req,res){
     }); 
   
 });
+
+
 app.get('/getCategories',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
-    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');   
+    var whose=req.body.whose;
     Category.find({}, function (err, docs) {
         if (docs.length){            
             res.send(docs);
@@ -328,6 +332,8 @@ app.get('/getCategories',function(req,res){
         }
     });    
 });
+
+
 app.get('/getExpenceCategories',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');    
