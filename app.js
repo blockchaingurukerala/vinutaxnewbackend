@@ -1853,7 +1853,32 @@ app.post('/getAllJournals',function(req,res){
     });    
 });
 
+app.post('/getJournalFromID',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;    
+    Journal.find({_id:id}, function (err, docs) {
+        if (docs.length){            
+            res.send(docs);
+        }else{
+            res.send({"msg":"Nodata"});
+        }
+    });    
+});
 
+app.post('/deleteJournal',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var id=req.body.id;    
+    Journal.deleteMany({_id :id}, function (err, _) {
+        if (err) {
+            res.send({"msg":"Error while Deleting...Pls Try after some time"});
+        }
+        else{
+            res.send({"msg":"Deleted Successfully"});
+        }
+    });
+});
 
 app.listen(process.env.PORT ||3000, function(){
     console.log('listening to port 3000');
