@@ -241,6 +241,7 @@ app.post('/insertNewCategory',function(req,res){
     var titlecategory=req.body.titlecategory;      
     var category = req.body.category   ; 
     var whose =  req.body.whose   ; 
+    console.log(titlecategory);
        Category.find({titlecategory:req.body.titlecategory}, function (err, docs) {
         if (docs.length){            
             // if exists
@@ -611,6 +612,7 @@ app.post('/addCustomerDetils',function(req,res){
                 } 
                 else{    
                     //console.log()
+
                    res.send({"msg":result._id});
                 } 
             }) ;
@@ -920,7 +922,6 @@ app.post('/allocateToCustomerInvoice',function(req,res){
     //    console.log(".......Came to API..................")
         if (err) {console.log(err);res.send({"msg":"Error in updating"});}
         else{ 
-
             CustomerInvoice.updateMany({whose:req.body.whose,_id:req.body.id,allocatedAmount:req.body.totalamount},{
                 allocated:true
              },
@@ -1050,6 +1051,7 @@ app.post('/allocateToCustomerInvoice',function(req,res){
         }
     });
 });
+
 
 
 app.post('/allocateToSupplierInvoice',function(req,res){
@@ -1673,8 +1675,61 @@ app.post('/addCashAccount',function(req,res){
         date : req.body.payment.date,
         amount: req.body.payment.amount ,
         autoamount:-1*req.body.payment.amount ,
-        description: req.body.payment.description  ,
+        description: req.body.payment.description ,
         category: req.body.payment.category ,  
+        count:0  ,  
+        whose: req.body.whose 
+   }          
+    var cashaccount = new CashAccount(cashaccount1);    
+    cashaccount.save(function(err,result){ 
+        if (err){ 
+            console.log(err); 
+            res.send({"msg":"Database Error"});
+        } 
+        else{            
+            var findQuery = CashAccount.find({whose:req.body.whose}).sort({count : -1}).limit(1);
+            findQuery.exec(function(err, maxResult){
+                if (err) { res.send({"msg":"Error in updating cashAccount Count Number"});}
+                else { 
+                    if(maxResult.length>0) {
+                        CashAccount.updateMany({whose:req.body.whose}, 
+                            {count:maxResult[0].count+1}, function (err, docs) {
+                            if (err){
+                                res.send({"msg":"Error in updating cashAccount Count Number"});
+                            }
+                            else{                                 
+                                res.send({"msg":"Successfully Saved"});
+                            }
+                        });
+                    }
+                    else{
+                        CashAccount.updateMany({whose:req.body.whose}, 
+                            {count:1}, function (err, docs) {
+                            if (err){
+                                res.send({"msg":"Error in updating cashAccount Count Number"});
+                            }
+                            else{                                
+                                res.send({"msg":"Successfully Saved"});
+                            }
+                        });
+                    }
+                }
+            });
+               
+        } 
+    }) ;
+});
+
+app.post('/addCashAccountFromAdjusted',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');     
+    var cashaccount1 = {      
+        cashaccountid : req.body.cashaccountid,
+        date : req.body.date,
+        amount: req.body.adjustedamount.amount ,
+        autoamount:-1*req.body.adjustedamount.amount ,
+        description: req.body.adjustedamount.description ,
+        category: req.body.adjustedamount.category ,  
         count:0  ,  
         whose: req.body.whose 
    }          
@@ -1731,7 +1786,18 @@ app.post('/getAllCashAccounts',function(req,res){
     });    
 });
 
-
+app.post('/getAllCashAccountsCustomer',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
+    var email=req.body.email;    
+    CashAccount.find({whose:email,category:req.body.username}, function (err, docs) {
+        if (docs.length){            
+            res.send(docs);
+        }else{
+            res.send({"msg":"Available"});
+        }
+    });    
+});
 
 app.post('/addbankstatement',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
