@@ -1786,6 +1786,7 @@ app.post('/getAllCashAccounts',function(req,res){
     });    
 });
 
+
 app.post('/getAllCashAccountsCustomer',function(req,res){
     res.header("Access-Control-Allow-Origin", "*")
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS'); 
@@ -1944,6 +1945,21 @@ app.post('/deleteJournal',function(req,res){
             res.send({"msg":"Deleted Successfully"});
         }
     });
+});
+
+app.post('/updateCashAccount',function(req,res){
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');   
+
+    CashAccount.updateMany({_id:req.body.id}, 
+        {category:req.body.newcategory}, function (err, docs) {
+        if (err){
+            res.send({"msg":"Error in updating cashAccount Count Number"});
+        }
+        else{                                
+            res.send({"msg":"Successfully Saved"});
+        }
+    }); 
 });
 
 app.listen(process.env.PORT ||3000, function(){
